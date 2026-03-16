@@ -233,6 +233,18 @@ CATEGORY COLOURS — all hex, no var() so works on any site
 .cat-datumy     .card-back .card-cat { color: #d97706; }
 .cat-datumy     .card-back .card-a   { color: #78350f; }
 
+/* bagration — oranžová */
+.cat-bagration  .card-front { background: linear-gradient(135deg, #9a3412, #ea580c); }
+.cat-bagration  .card-back  { border-color: #ea580c !important; background: #fff7ed !important; }
+.cat-bagration  .card-back .card-cat { color: #ea580c; }
+.cat-bagration  .card-back .card-a   { color: #7c2d12; }
+
+/* konec — tmavě šedá */
+.cat-konec      .card-front { background: linear-gradient(135deg, #1e293b, #475569); }
+.cat-konec      .card-back  { border-color: #475569 !important; background: #f1f5f9 !important; }
+.cat-konec      .card-back .card-cat { color: #475569; }
+.cat-konec      .card-back .card-a   { color: #1e293b; }
+
 /* ════════════════════════════════════════════════════
 SINGLE CARD VIEW
 ════════════════════════════════════════════════════ */
@@ -331,8 +343,10 @@ transition: background 0.15s; margin-top: 4px;
     <button class="filter-btn" data-cat="heydrich">Heydrich</button>
     <button class="filter-btn" data-cat="anthropoid">Anthropoid</button>
     <button class="filter-btn" data-cat="overlord">Overlord</button>
-    <button class="filter-btn" data-cat="belgie">Belgie</button>
+    <button class="filter-btn" data-cat="belgie">Západ — Ardeny</button>
     <button class="filter-btn" data-cat="tehran">Teherán</button>
+    <button class="filter-btn" data-cat="bagration">Bagration + Atentát</button>
+    <button class="filter-btn" data-cat="konec">Konec války</button>
     <button class="filter-btn" data-cat="datumy">📅 Jen datumy</button>
     <div class="controls">
       <button class="ctrl-btn" id="viewToggleBtn">▶ Jedna po druhé</button>
@@ -517,6 +531,42 @@ const CARDS = [
   { cat:'tehran', type:'pojem', q:'Jalta 1945 — navazující konference', a:'Únor 1945\nVelká trojka řešila rozdělení Německa\na uspořádání poválečné Evropy' },
   { cat:'tehran', type:'pojem', q:'Postupim 1945 — finální konference', a:'Červenec–srpen 1945\nFinální konference vítězných mocností\nRozhodnutí o rozdělení Německa\n→ čtyři ocupační zóny (USA, VB, FR, SSSR)' },
 
+  // ══ OPERACE BAGRATION + ATENTÁT NA HITLERA + VARŠAVSKÉ POVSTÁNÍ
+  { cat:'bagration', type:'datum', q:'22. 6. 1944', a:'Operace Bagration zahájena\n— sovětský útok v Bělorusku\nPomoc vylodění v Normandii (Německo na 2 frontách)' },
+  { cat:'bagration', type:'datum', q:'20. 7. 1944', a:'Atentát na Hitlera\nVlčí doupě, Východní Prusko\n→ Stauffenberg hodil bombu — Hitler přežil' },
+  { cat:'bagration', type:'datum', q:'1. 8. – 2. 10. 1944', a:'Varšavské povstání\nPolský odboj vs. Němci\n→ Hitler nechal Varšavu zničit' },
+  { cat:'bagration', type:'osoba', q:'Maršál Georgi Žukov', a:'Autor plánu operace Bagration\nVedl sovětský útok ze severu při dobývání Berlína' },
+  { cat:'bagration', type:'osoba', q:'Plukovník Stauffenberg', a:'Propašoval bombu k Hitlerovi 20. 7. 1944\nAtentát selhal — Hitler přežil\n→ Stauffenberg popraven' },
+  { cat:'bagration', type:'osoba', q:'Gen. Komorovský', a:'Velitel Varšavského povstání (1944)\nSnaha osvobodit Varšavu před příchodem SSSR\n→ Politický zájem o poválečný vliv' },
+  { cat:'bagration', type:'pojem', q:'Co je operace Bagration?', a:'Sovětský útok v Bělorusku (22. 6. 1944)\nAutor: maršál Žukov\nCíl: pomoc vylodění v Normandii\n→ Německo bojuje na 2 frontách zároveň' },
+  { cat:'bagration', type:'pojem', q:'Výsledky operace Bagration', a:'SSSR postupuje až k Visle\nOsvobozeno: Ukrajina, Bělorusko, Pobaltí, Minsk\nČásti Polska\nZastavení u Varšavy' },
+  { cat:'bagration', type:'pojem', q:'Atentát na Hitlera 20. 7. 1944 — průběh', a:'Stauffenberg propašoval bombu do Vlčího doupěte\nHitler přežil — bomba ho nezabila\nOperace Walküre spuštěna, ale selhala\n→ Hitler nechal účastníky popravit (i Rommel)' },
+  { cat:'bagration', type:'pojem', q:'Operace Walküre — co to bylo?', a:'Plán povolání voj. jednotek při vzpouře\nMěla zajistit převzetí moci po Hitlerově smrti\nSelhala, protože atentát byl neúspěšný\n→ Popraveni všichni účastníci' },
+  { cat:'bagration', type:'pojem', q:'Co se stalo s Rommelem po atentátu?', a:'Rommel věděl o plánovaném atentátu\nPo odhalení spiknutí: Hitler mu dal volbu\nSebevražda nebo veřejný soud\n→ Rommel vzal jed (říjen 1944)' },
+  { cat:'bagration', type:'pojem', q:'Varšavské povstání — proč selhalo?', a:'Příchod SSSR k Visle → Němci se stahují\nPoláci chtěli osvobodit město sami (polit. vliv)\nHitlera to nastvalo → Varšava zničena\nSSSR nepomohl — čekal za Vislou' },
+  { cat:'bagration', type:'pojem', q:'Tajné zbraně V1 a V2', a:'Německé letecké střely (neřízené rakety)\nV1 = létající bomba\nV2 = první balistická raketa na světě\nNasměrovány na cíl, pak se vypne motor → dopad' },
+
+  // ══ KONEC VÁLKY
+  { cat:'konec', type:'datum', q:'4. 2. – 11. 2. 1945', a:'Jaltská konference\nVelká trojka — Roosevelt, Stalin, Churchill\nDohoda o poválečném uspořádání Německa' },
+  { cat:'konec', type:'datum', q:'12. 4. 1945', a:'Roosevelt umírá\n→ nastupuje Harry Truman' },
+  { cat:'konec', type:'datum', q:'16. 4. – 2. 5. 1945', a:'Bitva o Berlín\nSSSR útočí — Žukov ze severu, Koněv z jihu' },
+  { cat:'konec', type:'datum', q:'30. 4. 1945', a:'Hitler spáchal sebevraždu\nProstřelení hlavy — věděl, že prohra je jasná\nEva Braunová — jed (den po svatbě)' },
+  { cat:'konec', type:'datum', q:'2. 5. 1945', a:'Kapitulace Berlína' },
+  { cat:'konec', type:'datum', q:'8. 5. 1945', a:'Konečná kapitulace Německa v Berlíně\n= Konec války v Evropě (V-E Day)' },
+  { cat:'konec', type:'datum', q:'6. 8. 1945', a:'Atomová bomba Little Boy na Hirošimu\n→ ohromné ztráty, nemoci z ozáření' },
+  { cat:'konec', type:'datum', q:'9. 8. 1945', a:'Atomová bomba Fat Man na Nagasaki' },
+  { cat:'konec', type:'datum', q:'2. 9. 1945', a:'Kapitulace Japonska na palubě USS Missouri\n⇒ KONEC 2. světové války' },
+  { cat:'konec', type:'osoba', q:'Maršál Koněv', a:'Velel sovětskému útoku z jihu\npři dobývání Berlína (1945)\nSpolu s Žukovem sevřeli město' },
+  { cat:'konec', type:'osoba', q:'Harry Truman', a:'Nastoupil po Rooseveltovi 12. 4. 1945\nRozkázal svrhnutí atomových bomb na Japonsko' },
+  { cat:'konec', type:'osoba', q:'Eva Braunová', a:'Hitlerova manželka (oženili se 29. 4. 1945)\nSpáchala sebevraždu jedem\n→ společně s Hitlerem 30. 4. 1945' },
+  { cat:'konec', type:'pojem', q:'Jaltská konference — výsledky', a:'Německo se nerozdělí, ale vznikne\nOkupační správa 4 velmocí (USA, VB, FR, SSSR)\nPotvrzena nová záp. hranice SSSR\nStalin slíbil: 3 měs. po porážce Německa\nnapadne Japonsko (splněno srpen 1945)' },
+  { cat:'konec', type:'pojem', q:'Projekt Manhattan', a:'Americký program vývoje atomové bomby\nCíl: přimět Japonsko ke kapitulaci\nBez něj by USA musely invadovat Japonsko\n→ ohromné vlastní ztráty' },
+  { cat:'konec', type:'pojem', q:'Proč USA shodily atomové bomby?', a:'Dobytí Japonska by stálo obrovské ztráty\nKamikazé (sebevražedné útoky) + nálety na Tokyo\nBomby měly přimět Japonsko ke kapitulaci\n→ Fungovalo: 2. 9. 1945 kapitulace' },
+  { cat:'konec', type:'pojem', q:'Kamikazé', a:'Japonská sebevražedná taktika\nPilot nárazem letadla do spojenecké lodi\n→ Velké ztráty pro USA\nProto nutnost jiného řešení (atomovky)' },
+  { cat:'konec', type:'pojem', q:'Little Boy vs. Fat Man', a:'Little Boy = uranová bomba\n→ Hirošima 6. 8. 1945\nFat Man = plutoniová bomba\n→ Nagasaki 9. 8. 1945' },
+  { cat:'konec', type:'pojem', q:'Bitva o Berlín — průběh', a:'16. 4. – 2. 5. 1945\nŽukov útočí ze severu, Koněv z jihu\nBerlín obklíčen a dobyt\n30. 4. Hitler sebevražda → 2. 5. kapitulace' },
+  { cat:'konec', type:'pojem', q:'Kde kapitulovalo Japonsko?', a:'Na palubě americké bitevní lodi USS Missouri\n2. září 1945 — podpis kapitulace\n→ Konec 2. světové války' },
+
   // ══ DATUMY — PŘEHLED
   { cat:'datumy', type:'datum', q:'15. 3. 1939', a:'Němci obsazují ČSR' },
   { cat:'datumy', type:'datum', q:'16. 3. 1939', a:'Vyhlášení Protektorátu Čechy a Morava' },
@@ -540,6 +590,18 @@ const CARDS = [
   { cat:'datumy', type:'datum', q:'16. 12. 1944', a:'Ardenská ofenzíva (Wacht am Rhein)' },
   { cat:'datumy', type:'datum', q:'28. 11. 1944', a:'Antverpy plně zprovozněny pro zásobování' },
   { cat:'datumy', type:'datum', q:'Leden 1945', a:'Němci vytlačeni z Ardenů → Patton prolomil Bastogne' },
+  { cat:'datumy', type:'datum', q:'4. 2. – 11. 2. 1945', a:'Jaltská konference (Velká trojka)' },
+  { cat:'datumy', type:'datum', q:'22. 6. 1944', a:'Operace Bagration — SSSR útočí v Bělorusku' },
+  { cat:'datumy', type:'datum', q:'20. 7. 1944', a:'Atentát na Hitlera (Stauffenberg, Vlčí doupě)' },
+  { cat:'datumy', type:'datum', q:'1. 8. – 2. 10. 1944', a:'Varšavské povstání' },
+  { cat:'datumy', type:'datum', q:'12. 4. 1945', a:'Roosevelt umírá → nastupuje Truman' },
+  { cat:'datumy', type:'datum', q:'16. 4. – 2. 5. 1945', a:'Bitva o Berlín (Žukov + Koněv)' },
+  { cat:'datumy', type:'datum', q:'30. 4. 1945', a:'Hitlerova sebevražda' },
+  { cat:'datumy', type:'datum', q:'2. 5. 1945', a:'Kapitulace Berlína' },
+  { cat:'datumy', type:'datum', q:'8. 5. 1945', a:'Konečná kapitulace Německa (V-E Day)' },
+  { cat:'datumy', type:'datum', q:'6. 8. 1945', a:'Bomba Little Boy na Hirošimu' },
+  { cat:'datumy', type:'datum', q:'9. 8. 1945', a:'Bomba Fat Man na Nagasaki' },
+  { cat:'datumy', type:'datum', q:'2. 9. 1945', a:'Kapitulace Japonska — konec 2. světové války' },
 ];
 
 /* ════════════════════════════════════════════════════

@@ -179,6 +179,25 @@ backface-visibility: hidden; -webkit-backface-visibility: hidden;
 
 /* Known dimming (grid only) */
 .grid .card-wrap.known .card-front { opacity: 0.3; }
+
+/* Known indicator in single mode — green ring, no dimming */
+.single-card-area .card-wrap.known .card-front::before {
+content: ‘✓ Zvládnuto’;
+position: absolute;
+top: 10px; left: 14px;
+font-size: 0.62rem; font-weight: 700;
+letter-spacing: 0.08em; text-transform: uppercase;
+color: #fff;
+background: rgba(5, 150, 105, 0.7);
+padding: 2px 8px; border-radius: 999px;
+z-index: 5;
+backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.single-card-area .card-wrap.known .card-inner {
+outline: 3px solid #059669;
+outline-offset: 2px;
+border-radius: 14px;
+}
 .known-btn {
 position: absolute; top: 8px; right: 8px;
 width: 22px; height: 22px; border-radius: 50%;
@@ -757,6 +776,23 @@ function renderSingleCard() {
   const card = displayedCards[singleIdx];
   const wrap = buildCard(card);
   if (singleFlipped) wrap.classList.add('flipped');
+  if (knownSet.has(singleIdx)) wrap.classList.add('known');
+
+  // Add ✓ button to front face
+  const front = wrap.querySelector('.card-front');
+  const kb = document.createElement('button');
+  kb.className = 'known-btn';
+  kb.title = 'Označit jako zvládnuté';
+  kb.textContent = '✓';
+  front.appendChild(kb);
+
+  kb.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (knownSet.has(singleIdx)) knownSet.delete(singleIdx);
+    else knownSet.add(singleIdx);
+    wrap.classList.toggle('known', knownSet.has(singleIdx));
+    updateProgress();
+  });
 
   wrap.addEventListener('click', () => {
     singleFlipped = !singleFlipped;

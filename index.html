@@ -248,7 +248,6 @@ cursor: pointer; transition: background 0.15s; margin-top: 4px;
       <button class="ctrl-btn" id="learnModeBtn" style="display:none">🎓 Režim učení</button>
       <button class="ctrl-btn" id="shuffleBtn">⇄ Zamíchat</button>
       <button class="ctrl-btn" id="resetBtn">↺ Reset</button>
-      <button class="ctrl-btn" id="hideKnownBtn">Skrýt zvládnuté</button>
     </div>
   </div>
 </header>
@@ -478,6 +477,7 @@ const CARDS = [
   { cat:'datumy', type:'datum', q:'2. 9. 1945', a:'Kapitulace Japonska → konec 2. světové války' },
 ];
 
+
 /* ════════════════════════════════════════════════════
    CONSTANTS
 ════════════════════════════════════════════════════ */
@@ -492,18 +492,62 @@ const CAT_NAMES = {
 
 /* ════════════════════════════════════════════════════
    STATE
+   displayedCards = aktuálně viditelné karty (zmenšuje se)
+   totalCards     = celkový počet pro progress bar
+   knownCount     = počet označených (odstraněných)
 ════════════════════════════════════════════════════ */
 let currentCat = 'vse', viewMode = 'grid', learnMode = false;
-let displayedCards = [], knownSet = new Set(), flippedSet = new Set(), hideKnown = false;
-let singleIdx = 0, singleFlipped = false, learnQueue = [], learnStartCount = 0;
+let displayedCards = [];
+let totalCards = 0, knownCount = 0;
+let flippedSet = new Set();
+let singleIdx = 0, singleFlipped = false;
+let learnQueue = [];   // pole objektů karet (ne indexů)
 
 function shuffle(arr) {
   const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
   return a;
 }
-function getFiltered() { return currentCat === 'vse' ? CARDS : CARDS.filter(c => c.cat === currentCat); }
+function getFiltered() { return currentCat === 'vse' ? [...CARDS] : CARDS.filter(c => c.cat === currentCat); }
 
+/* ── Označit kartu jako zvládnutou — odstraní ji odevšad ── */
+function markKnown(card) {
+  const idx = displayedCards.indexOf(card);
+  if (idx === -1) return;
+  displayedCards.splice(idx, 1);
+  knownCount++;
+  updateProgress();
+
+  if (viewMode === 'grid') {
+    // DOM element odstraněn v callbacku — nic dalšího
+    if (!displayedCards.length) showAllDoneGrid();
+  } else if (!learnMode) {
+    // single browse — zůstaň na stejném indexu (clamped)
+    singleIdx = Math.min(singleIdx, displayedCards.length - 1);
+    singleFlipped = false;
+    if (!displayedCards.length) showAllDoneSingle();
+    else renderSingleCard();
+  }
+  // learn mode — řeší renderLearnCard() po learnYep()
+}
+
+/* ════════════════════════════════════════════════════
+   PROGRESS
+════════════════════════════════════════════════════ */
+function updateProgress() {
+  const total = totalCards, known = knownCount;
+  const pct = total > 0 ? Math.round(known/total*100) : 0;
+  document.getElementById('progressFill').style.width = pct + '%';
+  const lbl = document.getElementById('progressLabel');
+  lbl.textContent = `${known} / ${total} zvládnuto — ${pct} %`;
+  lbl.classList.toggle('complete', pct === 100 && total > 0);
+  document.getElementById('countVisible').textContent = displayedCards.length;
+  document.getElementById('countKnown').textContent   = known;
+}
+
+/* ════════════════════════════════════════════════════
+   BUILD CARD ELEMENT
+════════════════════════════════════════════════════ */
 function buildCard(card) {
   const wrap = document.createElement('div');
   wrap.className = `card-wrap cat-${card.cat}`;
@@ -520,95 +564,101 @@ function buildCard(card) {
         <div class="card-hint">klikni zpět ←</div>
       </div>
     </div>`;
-  return wrap;
+  // ✓ tlačítko
+  const kb = document.createElement('button');
+  kb.className = 'known-btn'; kb.title = 'Zvládnuto — skrýt'; kb.textContent = '✓';
+  wrap.querySelector('.card-front').appendChild(kb);
+  return { wrap, kb };
 }
 
-function updateProgress() {
-  const total = displayedCards.length, known = knownSet.size;
-  const pct = total > 0 ? Math.round(known/total*100) : 0;
-  document.getElementById('progressFill').style.width = pct + '%';
-  const lbl = document.getElementById('progressLabel');
-  lbl.textContent = `${known} / ${total} zvládnuto — ${pct} %`;
-  lbl.classList.toggle('complete', pct===100 && total>0);
-  document.getElementById('countVisible').textContent = total;
-  document.getElementById('countKnown').textContent = known;
-}
-
+/* ════════════════════════════════════════════════════
+   GRID
+════════════════════════════════════════════════════ */
 function renderGrid(cards) {
-  displayedCards = cards; knownSet.clear(); flippedSet.clear();
+  displayedCards = cards;
+  flippedSet.clear();
   const grid = document.getElementById('grid'); grid.innerHTML = '';
-  const visible = hideKnown ? cards.filter((_,i)=>!knownSet.has(i)) : cards;
-  if (!visible.length) { grid.innerHTML='<div class="empty">Žádné kartičky.</div>'; updateProgress(); return; }
-  visible.forEach(card => {
-    const idx = cards.indexOf(card), wrap = buildCard(card);
-    if (knownSet.has(idx)) wrap.classList.add('known');
-    wrap.dataset.idx = idx;
-    const kb = document.createElement('button'); kb.className='known-btn'; kb.title='Zvládnuto'; kb.textContent='✓';
-    wrap.querySelector('.card-front').appendChild(kb);
+  if (!displayedCards.length) { showAllDoneGrid(); return; }
+
+  displayedCards.forEach(card => {
+    const { wrap, kb } = buildCard(card);
+    kb.addEventListener('click', e => {
+      e.stopPropagation();
+      wrap.remove();
+      markKnown(card);
+    });
     wrap.addEventListener('click', e => {
       if (e.target.classList.contains('known-btn')) return;
       wrap.classList.toggle('flipped');
-      const i = parseInt(wrap.dataset.idx);
-      wrap.classList.contains('flipped') ? flippedSet.add(i) : flippedSet.delete(i);
+      wrap.classList.contains('flipped')
+        ? flippedSet.add(card)
+        : flippedSet.delete(card);
       document.getElementById('countFlipped').textContent = flippedSet.size;
-    });
-    kb.addEventListener('click', e => {
-      e.stopPropagation();
-      const i = parseInt(wrap.dataset.idx);
-      knownSet.has(i) ? knownSet.delete(i) : knownSet.add(i);
-      wrap.classList.toggle('known', knownSet.has(i));
-      if (hideKnown && knownSet.has(i)) wrap.remove();
-      updateProgress();
     });
     grid.appendChild(wrap);
   });
   updateProgress();
 }
 
+function showAllDoneGrid() {
+  document.getElementById('grid').innerHTML =
+    '<div class="empty">🎉 Všechny kartičky zvládnuty! Stiskni ↺ Reset pro opakování.</div>';
+  updateProgress();
+}
+
+/* ════════════════════════════════════════════════════
+   SINGLE BROWSE
+════════════════════════════════════════════════════ */
 function renderSingleCard() {
   const area = document.getElementById('singleCardArea'); area.innerHTML = '';
-  if (!displayedCards.length) { area.innerHTML='<p style="text-align:center;color:#6b7e99;padding:40px 0">Žádné kartičky.</p>'; return; }
-  singleIdx = Math.max(0, Math.min(singleIdx, displayedCards.length-1));
-  const card = displayedCards[singleIdx], wrap = buildCard(card);
+  if (!displayedCards.length) { showAllDoneSingle(); return; }
+  singleIdx = Math.max(0, Math.min(singleIdx, displayedCards.length - 1));
+  const card = displayedCards[singleIdx];
+  const { wrap, kb } = buildCard(card);
   if (singleFlipped) wrap.classList.add('flipped');
-  if (knownSet.has(singleIdx)) wrap.classList.add('known');
-  const kb = document.createElement('button'); kb.className='known-btn'; kb.title='Zvládnuto'; kb.textContent='✓';
-  wrap.querySelector('.card-front').appendChild(kb);
+
   kb.addEventListener('click', e => {
     e.stopPropagation();
-    knownSet.has(singleIdx) ? knownSet.delete(singleIdx) : knownSet.add(singleIdx);
-    wrap.classList.toggle('known', knownSet.has(singleIdx));
-    updateProgress();
+    markKnown(card); // renderSingleCard() or showAllDoneSingle() called inside
   });
   wrap.addEventListener('click', () => {
     singleFlipped = !singleFlipped;
     wrap.classList.toggle('flipped', singleFlipped);
-    if (learnMode) {
-      document.getElementById('nopeBtn').disabled = !singleFlipped;
-      document.getElementById('yepBtn').disabled  = !singleFlipped;
-      document.getElementById('flipHint').classList.toggle('visible', !singleFlipped);
-    }
   });
   area.appendChild(wrap);
   document.getElementById('singleCounter').textContent = `${singleIdx+1} / ${displayedCards.length}`;
   document.getElementById('prevBtn').disabled = singleIdx === 0;
-  document.getElementById('nextBtn').disabled = singleIdx === displayedCards.length-1;
+  document.getElementById('nextBtn').disabled = singleIdx === displayedCards.length - 1;
+  updateProgress();
+}
+
+function showAllDoneSingle() {
+  document.getElementById('singleView').style.display   = 'none';
+  document.getElementById('completion').style.display   = 'flex';
+  document.getElementById('completionStats').innerHTML  =
+    `Zvládnuto: <strong>${knownCount} / ${totalCards}</strong> kartičky`;
   updateProgress();
 }
 
 function goSingle(dir) { singleIdx += dir; singleFlipped = false; renderSingleCard(); }
 
+/* ════════════════════════════════════════════════════
+   LEARNING MODE
+════════════════════════════════════════════════════ */
 function startLearnMode() {
-  learnQueue = shuffle(displayedCards.map((_,i)=>i).filter(i=>!knownSet.has(i)));
-  learnStartCount = learnQueue.length; renderLearnCard();
+  learnQueue = shuffle([...displayedCards]);
+  renderLearnCard();
 }
+
 function renderLearnCard() {
-  if (!learnQueue.length) { showCompletion(); return; }
+  if (!learnQueue.length) { showAllDoneSingle(); return; }
   singleFlipped = false;
   const area = document.getElementById('singleCardArea'); area.innerHTML = '';
-  const wrap = buildCard(displayedCards[learnQueue[0]]);
+  const card = learnQueue[0];
+  const { wrap } = buildCard(card);
   wrap.addEventListener('click', () => {
-    singleFlipped = !singleFlipped; wrap.classList.toggle('flipped', singleFlipped);
+    singleFlipped = !singleFlipped;
+    wrap.classList.toggle('flipped', singleFlipped);
     document.getElementById('nopeBtn').disabled = !singleFlipped;
     document.getElementById('yepBtn').disabled  = !singleFlipped;
     document.getElementById('flipHint').classList.toggle('visible', !singleFlipped);
@@ -620,99 +670,115 @@ function renderLearnCard() {
   document.getElementById('learnCounter').textContent = learnQueue.length;
   updateProgress();
 }
-function learnNope() { learnQueue.push(learnQueue.shift()); renderLearnCard(); }
-function learnYep()  { knownSet.add(learnQueue.shift()); renderLearnCard(); }
-function showCompletion() {
-  document.getElementById('singleView').style.display = 'none';
-  document.getElementById('completion').style.display = 'flex';
-  document.getElementById('completionStats').innerHTML =
-    `Zvládnuto: <strong>${knownSet.size} / ${displayedCards.length}</strong> kartičky`;
-  updateProgress();
+
+function learnNope() {
+  learnQueue.push(learnQueue.shift()); // vrátit na konec
+  renderLearnCard();
+}
+function learnYep() {
+  const card = learnQueue.shift(); // odebrat z fronty
+  markKnown(card);                 // odebrat z displayedCards + progress
+  // Pokud learnQueue teď obsahuje karty které byly odstraněny (nemělo by nastat), filtrujeme
+  learnQueue = learnQueue.filter(c => displayedCards.includes(c));
+  if (!learnQueue.length) showAllDoneSingle();
+  else renderLearnCard();
 }
 
+/* ════════════════════════════════════════════════════
+   VIEW SWITCHING
+════════════════════════════════════════════════════ */
 function setViewMode(mode) {
   viewMode = mode;
-  const grid=document.getElementById('grid'), sv=document.getElementById('singleView');
-  const compl=document.getElementById('completion'), lb=document.getElementById('learnModeBtn');
-  const vb=document.getElementById('viewToggleBtn'), sub=document.getElementById('modeSubtitle');
-  compl.style.display='none';
-  if (mode==='grid') {
-    grid.style.display=''; sv.style.display='none'; lb.style.display='none';
-    vb.textContent='▶ Jedna po druhé'; vb.classList.remove('mode-active');
-    sub.textContent='Grid — všechny kartičky najednou';
-    document.getElementById('statFlipped').style.display='';
-    document.getElementById('statRemaining').style.display='none';
-    learnMode=false; lb.classList.remove('learn-active'); lb.textContent='🎓 Režim učení';
+  const grid = document.getElementById('grid');
+  const sv   = document.getElementById('singleView');
+  const compl= document.getElementById('completion');
+  const lb   = document.getElementById('learnModeBtn');
+  const vb   = document.getElementById('viewToggleBtn');
+  const sub  = document.getElementById('modeSubtitle');
+  compl.style.display = 'none';
+
+  if (mode === 'grid') {
+    grid.style.display = ''; sv.style.display = 'none'; lb.style.display = 'none';
+    vb.textContent = '▶ Jedna po druhé'; vb.classList.remove('mode-active');
+    sub.textContent = 'Grid — všechny kartičky najednou';
+    document.getElementById('statFlipped').style.display = '';
+    document.getElementById('statRemaining').style.display = 'none';
+    learnMode = false; lb.classList.remove('learn-active'); lb.textContent = '🎓 Režim učení';
     renderGrid(displayedCards);
   } else {
-    grid.style.display='none'; sv.style.display='flex'; lb.style.display='';
-    vb.textContent='☰ Zobrazit grid'; vb.classList.add('mode-active');
-    sub.textContent='Jedna karta po druhé';
-    document.getElementById('statFlipped').style.display='none';
-    document.getElementById('statRemaining').style.display=learnMode?'':'none';
-    singleIdx=0; singleFlipped=false;
-    document.getElementById('browseNav').style.display=learnMode?'none':'flex';
-    document.getElementById('learnNav').style.display=learnMode?'flex':'none';
+    grid.style.display = 'none'; sv.style.display = 'flex'; lb.style.display = '';
+    vb.textContent = '☰ Zobrazit grid'; vb.classList.add('mode-active');
+    sub.textContent = 'Jedna karta po druhé';
+    document.getElementById('statFlipped').style.display = 'none';
+    document.getElementById('statRemaining').style.display = learnMode ? '' : 'none';
+    singleIdx = 0; singleFlipped = false;
+    document.getElementById('browseNav').style.display = learnMode ? 'none' : 'flex';
+    document.getElementById('learnNav').style.display  = learnMode ? 'flex'  : 'none';
     document.getElementById('flipHint').classList.remove('visible');
     learnMode ? startLearnMode() : renderSingleCard();
   }
 }
 
 function toggleLearnMode() {
-  learnMode=!learnMode;
-  const btn=document.getElementById('learnModeBtn');
+  learnMode = !learnMode;
+  const btn = document.getElementById('learnModeBtn');
   if (learnMode) {
-    btn.classList.add('learn-active'); btn.textContent='✕ Ukončit učení';
-    document.getElementById('modeSubtitle').textContent='Režim učení — Neumím / Zvládám';
-    document.getElementById('statRemaining').style.display='';
-    document.getElementById('browseNav').style.display='none';
-    document.getElementById('learnNav').style.display='flex';
-    document.getElementById('completion').style.display='none';
-    document.getElementById('singleView').style.display='flex';
+    btn.classList.add('learn-active'); btn.textContent = '✕ Ukončit učení';
+    document.getElementById('modeSubtitle').textContent = 'Režim učení — Neumím / Zvládám';
+    document.getElementById('statRemaining').style.display = '';
+    document.getElementById('browseNav').style.display = 'none';
+    document.getElementById('learnNav').style.display  = 'flex';
+    document.getElementById('completion').style.display = 'none';
+    document.getElementById('singleView').style.display = 'flex';
     startLearnMode();
   } else {
-    btn.classList.remove('learn-active'); btn.textContent='🎓 Režim učení';
-    document.getElementById('modeSubtitle').textContent='Jedna karta po druhé';
-    document.getElementById('statRemaining').style.display='none';
-    document.getElementById('browseNav').style.display='flex';
-    document.getElementById('learnNav').style.display='none';
-    singleIdx=0; singleFlipped=false; renderSingleCard();
+    btn.classList.remove('learn-active'); btn.textContent = '🎓 Režim učení';
+    document.getElementById('modeSubtitle').textContent = 'Jedna karta po druhé';
+    document.getElementById('statRemaining').style.display = 'none';
+    document.getElementById('browseNav').style.display = 'flex';
+    document.getElementById('learnNav').style.display  = 'none';
+    singleIdx = 0; singleFlipped = false; renderSingleCard();
   }
 }
 
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
 function init(cards) {
-  displayedCards=cards; knownSet.clear(); flippedSet.clear(); learnMode=false;
+  displayedCards = cards;
+  totalCards     = cards.length;
+  knownCount     = 0;
+  flippedSet.clear();
+  learnMode = false;
   document.getElementById('learnModeBtn').classList.remove('learn-active');
-  document.getElementById('learnModeBtn').textContent='🎓 Režim učení';
-  document.getElementById('completion').style.display='none';
-  viewMode==='grid' ? renderGrid(displayedCards) : (singleIdx=0, singleFlipped=false, renderSingleCard());
+  document.getElementById('learnModeBtn').textContent = '🎓 Režim učení';
+  document.getElementById('completion').style.display = 'none';
+  if (viewMode === 'grid') renderGrid(displayedCards);
+  else { singleIdx = 0; singleFlipped = false; renderSingleCard(); }
 }
 
+/* ════════════════════════════════════════════════════
+   EVENT LISTENERS
+════════════════════════════════════════════════════ */
 document.querySelectorAll('.filter-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active'); currentCat=btn.dataset.cat; init(getFiltered());
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active'); currentCat = btn.dataset.cat; init(getFiltered());
   });
 });
-document.getElementById('viewToggleBtn').addEventListener('click', () => setViewMode(viewMode==='grid'?'single':'grid'));
+document.getElementById('viewToggleBtn').addEventListener('click', () =>
+  setViewMode(viewMode === 'grid' ? 'single' : 'grid'));
 document.getElementById('learnModeBtn').addEventListener('click', toggleLearnMode);
 document.getElementById('shuffleBtn').addEventListener('click', () => init(shuffle(getFiltered())));
-document.getElementById('resetBtn').addEventListener('click', () => {
-  hideKnown=false; document.getElementById('hideKnownBtn').textContent='Skrýt zvládnuté'; init(getFiltered());
-});
-document.getElementById('hideKnownBtn').addEventListener('click', () => {
-  hideKnown=!hideKnown;
-  document.getElementById('hideKnownBtn').textContent=hideKnown?'Zobrazit vše':'Skrýt zvládnuté';
-  if (viewMode==='grid') renderGrid(displayedCards);
-});
+document.getElementById('resetBtn').addEventListener('click', () => init(getFiltered()));
 document.getElementById('prevBtn').addEventListener('click', () => goSingle(-1));
 document.getElementById('nextBtn').addEventListener('click', () => goSingle(1));
 document.getElementById('nopeBtn').addEventListener('click', learnNope);
 document.getElementById('yepBtn').addEventListener('click',  learnYep);
 document.getElementById('restartBtn').addEventListener('click', () => {
-  document.getElementById('completion').style.display='none';
-  document.getElementById('singleView').style.display='flex';
-  learnMode ? startLearnMode() : (singleIdx=0, singleFlipped=false, renderSingleCard());
+  document.getElementById('completion').style.display = 'none';
+  document.getElementById('singleView').style.display = 'flex';
+  learnMode ? startLearnMode() : (singleIdx = 0, singleFlipped = false, renderSingleCard());
 });
 
 init(getFiltered());

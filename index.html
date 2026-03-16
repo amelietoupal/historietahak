@@ -168,6 +168,11 @@ outline: 3px solid #059669; outline-offset: 2px; border-radius: 14px;
 .cat-konec      .card-back  { border-color: #475569 !important; background: #f1f5f9 !important; }
 .cat-konec      .card-back .card-cat { color: #475569 !important; }
 .cat-konec      .card-back .card-a   { color: #1e293b !important; }
+/* obrat 1943 — teal-green */
+.cat-obrat      .card-front { background: linear-gradient(135deg, #134e4a, #0d9488); }
+.cat-obrat      .card-back  { border-color: #0d9488 !important; background: #f0fdfa !important; }
+.cat-obrat      .card-back .card-cat { color: #0d9488 !important; }
+.cat-obrat      .card-back .card-a   { color: #134e4a !important; }
 
 .cat-datumy     .card-front { background: linear-gradient(135deg, #78350f, #d97706); }
 .cat-datumy     .card-back  { border-color: #d97706 !important; background: #fffbeb !important; }
@@ -240,6 +245,7 @@ cursor: pointer; transition: background 0.15s; margin-top: 4px;
     <button class="filter-btn" data-cat="anthropoid">Anthropoid</button>
     <button class="filter-btn" data-cat="overlord">Overlord</button>
     <button class="filter-btn" data-cat="tehran">Teherán</button>
+    <button class="filter-btn" data-cat="obrat">1943 — Obrat</button>
     <button class="filter-btn" data-cat="bagration">Bagration + Atentát</button>
     <button class="filter-btn" data-cat="konec">Konec války</button>
     <button class="filter-btn" data-cat="datumy">📅 Jen datumy</button>
@@ -445,6 +451,18 @@ const CARDS = [
   { cat:'konec', type:'pojem', q:'Little Boy vs. Fat Man', a:'Little Boy = atomová bomba\n→ Hirošima 6. 8. 1945\nFat Man = atomová bomba\n→ Nagasaki 9. 8. 1945' },
   { cat:'konec', type:'pojem', q:'Kde a jak kapitulovalo Japonsko?', a:'Na palubě bitevní lodi Missouri\n2. září 1945\n→ Konec 2. světové války' },
 
+
+  // ══ 1943 OBRAT (obrázek 5) ═════════════════════════════════════════
+  { cat:'obrat', type:'datum', q:'Zima 1942/1943', a:'Bitva u Stalingradu\n→ Německo utrpělo drtivou porážku\n→ obrovské ztráty německé armády' },
+  { cat:'obrat', type:'datum', q:'Léto 1943', a:'Bitva u Kurska\n→ druhá velká porážka Německa na východě\n→ SSSR přebírá strategickou iniciativu' },
+  { cat:'obrat', type:'datum', q:'Jaro 1943', a:'Kapitulace Tunisu\n→ konec německo-italského odporu v sev. Africe\n→ cesta otevřena pro útok na Itálii' },
+
+  { cat:'obrat', type:'pojem', q:'Co je „obrat" roku 1943?', a:'Zlomový bod 2. světové války\nNěmecko utrpělo porážky u Stalingradu, Kurska\n+ kapitulace Tunisu\n→ obrovské ztráty Němců × síla SSSR roste' },
+  { cat:'obrat', type:'pojem', q:'Bitva u Stalingradu — proč důležitá?', a:'Největší porážka Německa na východní frontě\nNěmci uvízli ve městě a byli obklíčeni\n→ obrovské ztráty\n→ SSSR začíná být silnější než Německo' },
+  { cat:'obrat', type:'pojem', q:'Bitva u Kurska — proč důležitá?', a:'Největší tanková bitva v historii\nNěmci zaútočili, ale SSSR se ubránil\n→ Německo ztrácí strategickou iniciativu na východě\n→ SSSR začíná postup na západ' },
+  { cat:'obrat', type:'pojem', q:'Kapitulace Tunisu — co znamenala?', a:'Konec německo-italského tažení v sev. Africe\nSpojenecká vítězství v Africe = cesta do Evropy\n→ otvírá cestu pro vylodění na Sicílii a v Itálii\n→ přispělo k tlaku na Německo ze 3 stran' },
+  { cat:'obrat', type:'pojem', q:'Jak 1943 ovlivnil poválečné uspořádání?', a:'Posílení SSSR → větší vliv na poválečnou Evropu\nBeneš se orientoval na SSSR jako záštitu ČS\nTeheránská konference (1943) — SSSR klíčový hráč\n→ Západ ustupoval Stalinovi' },
+
   // ══ PŘEHLED DATUMŮ ═══════════════════════════════════════════════
   { cat:'datumy', type:'datum', q:'15. 3. 1939', a:'Začala okupace ČSR' },
   { cat:'datumy', type:'datum', q:'16. 3. 1939', a:'Vyhlášen Protektorát Čechy a Morava' },
@@ -475,6 +493,9 @@ const CARDS = [
   { cat:'datumy', type:'datum', q:'6. 8. 1945', a:'Bomba Little Boy na Hirošimu' },
   { cat:'datumy', type:'datum', q:'9. 8. 1945', a:'Bomba Fat Man na Nagasaki' },
   { cat:'datumy', type:'datum', q:'2. 9. 1945', a:'Kapitulace Japonska → konec 2. světové války' },
+  { cat:'datumy', type:'datum', q:'Zima 1942/1943', a:'Bitva u Stalingradu — porážka Německa' },
+  { cat:'datumy', type:'datum', q:'Léto 1943', a:'Bitva u Kurska — SSSR přebírá iniciativu' },
+  { cat:'datumy', type:'datum', q:'Jaro 1943', a:'Kapitulace Tunisu — konec Osy v Africe' },
 ];
 
 
@@ -486,258 +507,321 @@ const CAT_NAMES = {
   zahranici:'Čs. zahraniční odboj', domaci:'Domácí odboj',
   heydrich:'Heydrich', anthropoid:'Anthropoid',
   overlord:'Overlord', tehran:'Teherán',
-  bagration:'Bagration + Atentát', konec:'Konec války',
+  obrat:'1943 — Obrat', bagration:'Bagration + Atentát', konec:'Konec války',
   datumy:'Přehled dat',
 };
 
 /* ════════════════════════════════════════════════════
    STATE
-   displayedCards = aktuálně viditelné karty (zmenšuje se)
-   totalCards     = celkový počet pro progress bar
-   knownCount     = počet označených (odstraněných)
 ════════════════════════════════════════════════════ */
-let currentCat = 'vse', viewMode = 'grid', learnMode = false;
+let currentCat = 'vse';
+let viewMode   = 'grid';   // 'grid' | 'single'
+let learnMode  = false;
+
+// displayedCards shrinks as cards are marked known
 let displayedCards = [];
 let totalCards = 0, knownCount = 0;
-let flippedSet = new Set();
-let singleIdx = 0, singleFlipped = false;
-let learnQueue = [];   // pole objektů karet (ne indexů)
 
+let flippedSet    = new Set();
+let singleIdx     = 0;
+let singleFlipped = false;
+
+// Learn mode: queue of card objects
+let learnQueue = [];
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
 function shuffle(arr) {
   const a = [...arr];
-  for (let i = a.length-1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
   return a;
 }
-function getFiltered() { return currentCat === 'vse' ? [...CARDS] : CARDS.filter(c => c.cat === currentCat); }
 
-/* ── Označit kartu jako zvládnutou — odstraní ji odevšad ── */
-function markKnown(card) {
-  const idx = displayedCards.indexOf(card);
-  if (idx === -1) return;
-  displayedCards.splice(idx, 1);
-  knownCount++;
-  updateProgress();
-
-  if (viewMode === 'grid') {
-    // DOM element odstraněn v callbacku — nic dalšího
-    if (!displayedCards.length) showAllDoneGrid();
-  } else if (!learnMode) {
-    // single browse — zůstaň na stejném indexu (clamped)
-    singleIdx = Math.min(singleIdx, displayedCards.length - 1);
-    singleFlipped = false;
-    if (!displayedCards.length) showAllDoneSingle();
-    else renderSingleCard();
-  }
-  // learn mode — řeší renderLearnCard() po learnYep()
+function getFiltered() {
+  return currentCat === 'vse' ? [...CARDS] : CARDS.filter(c => c.cat === currentCat);
 }
 
 /* ════════════════════════════════════════════════════
-   PROGRESS
+   MARK KNOWN — remove card everywhere
+   Does NOT re-render — caller handles that
+════════════════════════════════════════════════════ */
+function removeFromDisplayed(card) {
+  const idx = displayedCards.indexOf(card);
+  if (idx !== -1) { displayedCards.splice(idx, 1); knownCount++; updateProgress(); }
+}
+
+/* ════════════════════════════════════════════════════
+   PROGRESS BAR
 ════════════════════════════════════════════════════ */
 function updateProgress() {
-  const total = totalCards, known = knownCount;
-  const pct = total > 0 ? Math.round(known/total*100) : 0;
+  const pct = totalCards > 0 ? Math.round(knownCount / totalCards * 100) : 0;
   document.getElementById('progressFill').style.width = pct + '%';
   const lbl = document.getElementById('progressLabel');
-  lbl.textContent = `${known} / ${total} zvládnuto — ${pct} %`;
-  lbl.classList.toggle('complete', pct === 100 && total > 0);
+  lbl.textContent = knownCount + ' / ' + totalCards + ' zvládnuto — ' + pct + ' %';
+  lbl.classList.toggle('complete', pct === 100 && totalCards > 0);
   document.getElementById('countVisible').textContent = displayedCards.length;
-  document.getElementById('countKnown').textContent   = known;
+  document.getElementById('countKnown').textContent   = knownCount;
 }
 
 /* ════════════════════════════════════════════════════
-   BUILD CARD ELEMENT
+   BUILD CARD DOM ELEMENT
 ════════════════════════════════════════════════════ */
 function buildCard(card) {
   const wrap = document.createElement('div');
-  wrap.className = `card-wrap cat-${card.cat}`;
-  wrap.innerHTML = `
-    <div class="card-inner">
-      <div class="card-face card-front">
-        <div><div class="card-cat">${CAT_NAMES[card.cat]||card.cat}</div><div class="card-type">${TYPE_LABELS[card.type]||card.type}</div></div>
-        <div class="card-q">${card.q}</div>
-        <div class="card-hint">klikni pro odpověď →</div>
-      </div>
-      <div class="card-face card-back">
-        <div class="card-cat">${TYPE_LABELS[card.type]||''}</div>
-        <div class="card-a">${card.a}</div>
-        <div class="card-hint">klikni zpět ←</div>
-      </div>
-    </div>`;
-  // ✓ tlačítko
+  wrap.className = 'card-wrap cat-' + card.cat;
+  wrap.innerHTML =
+    '<div class="card-inner">' +
+      '<div class="card-face card-front">' +
+        '<div>' +
+          '<div class="card-cat">' + (CAT_NAMES[card.cat] || card.cat) + '</div>' +
+          '<div class="card-type">' + (TYPE_LABELS[card.type] || card.type) + '</div>' +
+        '</div>' +
+        '<div class="card-q">' + card.q + '</div>' +
+        '<div class="card-hint">klikni pro odpověď →</div>' +
+      '</div>' +
+      '<div class="card-face card-back">' +
+        '<div class="card-cat">' + (TYPE_LABELS[card.type] || '') + '</div>' +
+        '<div class="card-a">' + card.a + '</div>' +
+        '<div class="card-hint">klikni zpět ←</div>' +
+      '</div>' +
+    '</div>';
+  // ✓ button — only on front face
   const kb = document.createElement('button');
-  kb.className = 'known-btn'; kb.title = 'Zvládnuto — skrýt'; kb.textContent = '✓';
+  kb.className = 'known-btn';
+  kb.title     = 'Zvládnuto — odebrat';
+  kb.textContent = '✓';
   wrap.querySelector('.card-front').appendChild(kb);
   return { wrap, kb };
 }
 
 /* ════════════════════════════════════════════════════
-   GRID
+   GRID VIEW
 ════════════════════════════════════════════════════ */
-function renderGrid(cards) {
-  displayedCards = cards;
+function renderGrid() {
   flippedSet.clear();
-  const grid = document.getElementById('grid'); grid.innerHTML = '';
-  if (!displayedCards.length) { showAllDoneGrid(); return; }
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
 
-  displayedCards.forEach(card => {
-    const { wrap, kb } = buildCard(card);
-    kb.addEventListener('click', e => {
+  if (!displayedCards.length) {
+    grid.innerHTML = '<div class="empty">🎉 Všechny zvládnuty! Stiskni ↺ Reset.</div>';
+    return;
+  }
+
+  displayedCards.slice().forEach(function(card) {
+    var built = buildCard(card);
+    var wrap = built.wrap, kb = built.kb;
+
+    kb.addEventListener('click', function(e) {
       e.stopPropagation();
       wrap.remove();
-      markKnown(card);
+      removeFromDisplayed(card);
+      if (!displayedCards.length) {
+        grid.innerHTML = '<div class="empty">🎉 Všechny zvládnuty! Stiskni ↺ Reset.</div>';
+      }
     });
-    wrap.addEventListener('click', e => {
+
+    wrap.addEventListener('click', function(e) {
       if (e.target.classList.contains('known-btn')) return;
       wrap.classList.toggle('flipped');
-      wrap.classList.contains('flipped')
-        ? flippedSet.add(card)
-        : flippedSet.delete(card);
+      if (wrap.classList.contains('flipped')) flippedSet.add(card);
+      else flippedSet.delete(card);
       document.getElementById('countFlipped').textContent = flippedSet.size;
     });
+
     grid.appendChild(wrap);
   });
-  updateProgress();
-}
-
-function showAllDoneGrid() {
-  document.getElementById('grid').innerHTML =
-    '<div class="empty">🎉 Všechny kartičky zvládnuty! Stiskni ↺ Reset pro opakování.</div>';
-  updateProgress();
 }
 
 /* ════════════════════════════════════════════════════
-   SINGLE BROWSE
+   SINGLE BROWSE VIEW
 ════════════════════════════════════════════════════ */
 function renderSingleCard() {
-  const area = document.getElementById('singleCardArea'); area.innerHTML = '';
-  if (!displayedCards.length) { showAllDoneSingle(); return; }
-  singleIdx = Math.max(0, Math.min(singleIdx, displayedCards.length - 1));
-  const card = displayedCards[singleIdx];
-  const { wrap, kb } = buildCard(card);
+  var area = document.getElementById('singleCardArea');
+  area.innerHTML = '';
+
+  if (!displayedCards.length) {
+    showDoneScreen();
+    return;
+  }
+
+  if (singleIdx >= displayedCards.length) singleIdx = displayedCards.length - 1;
+  if (singleIdx < 0) singleIdx = 0;
+
+  var card = displayedCards[singleIdx];
+  var built = buildCard(card);
+  var wrap = built.wrap, kb = built.kb;
+
   if (singleFlipped) wrap.classList.add('flipped');
 
-  kb.addEventListener('click', e => {
+  kb.addEventListener('click', function(e) {
     e.stopPropagation();
-    markKnown(card); // renderSingleCard() or showAllDoneSingle() called inside
+    removeFromDisplayed(card);
+    // Stay at same index (next card slides in), clamp at end
+    if (singleIdx >= displayedCards.length) singleIdx = Math.max(0, displayedCards.length - 1);
+    singleFlipped = false;
+    renderSingleCard();
   });
-  wrap.addEventListener('click', () => {
+
+  wrap.addEventListener('click', function() {
     singleFlipped = !singleFlipped;
     wrap.classList.toggle('flipped', singleFlipped);
   });
+
   area.appendChild(wrap);
-  document.getElementById('singleCounter').textContent = `${singleIdx+1} / ${displayedCards.length}`;
-  document.getElementById('prevBtn').disabled = singleIdx === 0;
-  document.getElementById('nextBtn').disabled = singleIdx === displayedCards.length - 1;
+
+  document.getElementById('singleCounter').textContent = (singleIdx + 1) + ' / ' + displayedCards.length;
+  document.getElementById('prevBtn').disabled = (singleIdx === 0);
+  document.getElementById('nextBtn').disabled = (singleIdx === displayedCards.length - 1);
   updateProgress();
 }
 
-function showAllDoneSingle() {
-  document.getElementById('singleView').style.display   = 'none';
-  document.getElementById('completion').style.display   = 'flex';
-  document.getElementById('completionStats').innerHTML  =
-    `Zvládnuto: <strong>${knownCount} / ${totalCards}</strong> kartičky`;
-  updateProgress();
+function goSingle(dir) {
+  singleIdx += dir;
+  singleFlipped = false;
+  renderSingleCard();
 }
-
-function goSingle(dir) { singleIdx += dir; singleFlipped = false; renderSingleCard(); }
 
 /* ════════════════════════════════════════════════════
-   LEARNING MODE
+   LEARN MODE
 ════════════════════════════════════════════════════ */
 function startLearnMode() {
-  learnQueue = shuffle([...displayedCards]);
-  renderLearnCard();
+  learnQueue = shuffle(displayedCards.slice()); // copy of current cards
+  showLearnCard();
 }
 
-function renderLearnCard() {
-  if (!learnQueue.length) { showAllDoneSingle(); return; }
-  singleFlipped = false;
-  const area = document.getElementById('singleCardArea'); area.innerHTML = '';
-  const card = learnQueue[0];
-  const { wrap } = buildCard(card);
-  wrap.addEventListener('click', () => {
+function showLearnCard() {
+  var area = document.getElementById('singleCardArea');
+  area.innerHTML = '';
+
+  // Remove from queue any card no longer in displayedCards
+  learnQueue = learnQueue.filter(function(c) {
+    return displayedCards.indexOf(c) !== -1;
+  });
+
+  if (!learnQueue.length) {
+    showDoneScreen();
+    return;
+  }
+
+  document.getElementById('learnCounter').textContent = learnQueue.length;
+  document.getElementById('nopeBtn').disabled = true;
+  document.getElementById('yepBtn').disabled  = true;
+  document.getElementById('flipHint').classList.add('visible');
+
+  var card = learnQueue[0];
+  var built = buildCard(card);
+  var wrap = built.wrap;
+  // In learn mode the ✓ button is not shown (we use Neumím/Zvládám instead)
+  built.kb.style.display = 'none';
+
+  wrap.addEventListener('click', function() {
     singleFlipped = !singleFlipped;
     wrap.classList.toggle('flipped', singleFlipped);
     document.getElementById('nopeBtn').disabled = !singleFlipped;
     document.getElementById('yepBtn').disabled  = !singleFlipped;
     document.getElementById('flipHint').classList.toggle('visible', !singleFlipped);
   });
+
   area.appendChild(wrap);
-  document.getElementById('nopeBtn').disabled = true;
-  document.getElementById('yepBtn').disabled  = true;
-  document.getElementById('flipHint').classList.add('visible');
-  document.getElementById('learnCounter').textContent = learnQueue.length;
   updateProgress();
 }
 
 function learnNope() {
-  learnQueue.push(learnQueue.shift()); // vrátit na konec
-  renderLearnCard();
+  // Move current card to end of queue
+  if (learnQueue.length > 0) {
+    learnQueue.push(learnQueue.shift());
+  }
+  singleFlipped = false;
+  showLearnCard();
 }
+
 function learnYep() {
-  const card = learnQueue.shift(); // odebrat z fronty
-  markKnown(card);                 // odebrat z displayedCards + progress
-  // Pokud learnQueue teď obsahuje karty které byly odstraněny (nemělo by nastat), filtrujeme
-  learnQueue = learnQueue.filter(c => displayedCards.includes(c));
-  if (!learnQueue.length) showAllDoneSingle();
-  else renderLearnCard();
+  // Remove from queue AND from displayedCards
+  if (learnQueue.length > 0) {
+    var card = learnQueue.shift();
+    removeFromDisplayed(card);
+  }
+  singleFlipped = false;
+  showLearnCard();
 }
 
 /* ════════════════════════════════════════════════════
-   VIEW SWITCHING
+   DONE SCREEN
 ════════════════════════════════════════════════════ */
-function setViewMode(mode) {
-  viewMode = mode;
-  const grid = document.getElementById('grid');
-  const sv   = document.getElementById('singleView');
-  const compl= document.getElementById('completion');
-  const lb   = document.getElementById('learnModeBtn');
-  const vb   = document.getElementById('viewToggleBtn');
-  const sub  = document.getElementById('modeSubtitle');
-  compl.style.display = 'none';
+function showDoneScreen() {
+  document.getElementById('singleView').style.display  = 'none';
+  document.getElementById('completion').style.display  = 'flex';
+  document.getElementById('completionStats').innerHTML =
+    'Zvládnuto: <strong>' + knownCount + ' / ' + totalCards + '</strong> kartičky';
+  updateProgress();
+}
 
-  if (mode === 'grid') {
-    grid.style.display = ''; sv.style.display = 'none'; lb.style.display = 'none';
-    vb.textContent = '▶ Jedna po druhé'; vb.classList.remove('mode-active');
-    sub.textContent = 'Grid — všechny kartičky najednou';
-    document.getElementById('statFlipped').style.display = '';
-    document.getElementById('statRemaining').style.display = 'none';
-    learnMode = false; lb.classList.remove('learn-active'); lb.textContent = '🎓 Režim učení';
-    renderGrid(displayedCards);
-  } else {
-    grid.style.display = 'none'; sv.style.display = 'flex'; lb.style.display = '';
-    vb.textContent = '☰ Zobrazit grid'; vb.classList.add('mode-active');
-    sub.textContent = 'Jedna karta po druhé';
-    document.getElementById('statFlipped').style.display = 'none';
-    document.getElementById('statRemaining').style.display = learnMode ? '' : 'none';
-    singleIdx = 0; singleFlipped = false;
-    document.getElementById('browseNav').style.display = learnMode ? 'none' : 'flex';
-    document.getElementById('learnNav').style.display  = learnMode ? 'flex'  : 'none';
-    document.getElementById('flipHint').classList.remove('visible');
-    learnMode ? startLearnMode() : renderSingleCard();
-  }
+/* ════════════════════════════════════════════════════
+   VIEW MODE SWITCHING
+════════════════════════════════════════════════════ */
+function switchToGrid() {
+  viewMode = 'grid';
+  document.getElementById('grid').style.display        = '';
+  document.getElementById('singleView').style.display  = 'none';
+  document.getElementById('completion').style.display  = 'none';
+  document.getElementById('learnModeBtn').style.display= 'none';
+  document.getElementById('viewToggleBtn').textContent  = '▶ Jedna po druhé';
+  document.getElementById('viewToggleBtn').classList.remove('mode-active');
+  document.getElementById('modeSubtitle').textContent   = 'Grid — všechny kartičky najednou';
+  document.getElementById('statFlipped').style.display  = '';
+  document.getElementById('statRemaining').style.display= 'none';
+  learnMode = false;
+  document.getElementById('learnModeBtn').classList.remove('learn-active');
+  document.getElementById('learnModeBtn').textContent   = '🎓 Režim učení';
+  renderGrid();
+}
+
+function switchToSingle() {
+  viewMode = 'single';
+  document.getElementById('grid').style.display        = 'none';
+  document.getElementById('singleView').style.display  = 'flex';
+  document.getElementById('completion').style.display  = 'none';
+  document.getElementById('learnModeBtn').style.display= '';
+  document.getElementById('viewToggleBtn').textContent  = '☰ Zobrazit grid';
+  document.getElementById('viewToggleBtn').classList.add('mode-active');
+  document.getElementById('modeSubtitle').textContent   = 'Jedna karta po druhé';
+  document.getElementById('statFlipped').style.display  = 'none';
+  document.getElementById('statRemaining').style.display= learnMode ? '' : 'none';
+  document.getElementById('browseNav').style.display    = learnMode ? 'none' : 'flex';
+  document.getElementById('learnNav').style.display     = learnMode ? 'flex' : 'none';
+  document.getElementById('flipHint').classList.remove('visible');
+  singleIdx = 0; singleFlipped = false;
+  if (learnMode) startLearnMode();
+  else renderSingleCard();
 }
 
 function toggleLearnMode() {
   learnMode = !learnMode;
-  const btn = document.getElementById('learnModeBtn');
+  var btn = document.getElementById('learnModeBtn');
   if (learnMode) {
-    btn.classList.add('learn-active'); btn.textContent = '✕ Ukončit učení';
-    document.getElementById('modeSubtitle').textContent = 'Režim učení — Neumím / Zvládám';
-    document.getElementById('statRemaining').style.display = '';
-    document.getElementById('browseNav').style.display = 'none';
-    document.getElementById('learnNav').style.display  = 'flex';
-    document.getElementById('completion').style.display = 'none';
-    document.getElementById('singleView').style.display = 'flex';
+    btn.classList.add('learn-active');
+    btn.textContent = '✕ Ukončit učení';
+    document.getElementById('modeSubtitle').textContent   = 'Režim učení — Neumím / Zvládám';
+    document.getElementById('statRemaining').style.display= '';
+    document.getElementById('browseNav').style.display    = 'none';
+    document.getElementById('learnNav').style.display     = 'flex';
+    document.getElementById('completion').style.display   = 'none';
+    document.getElementById('singleView').style.display   = 'flex';
+    singleFlipped = false;
     startLearnMode();
   } else {
-    btn.classList.remove('learn-active'); btn.textContent = '🎓 Režim učení';
-    document.getElementById('modeSubtitle').textContent = 'Jedna karta po druhé';
-    document.getElementById('statRemaining').style.display = 'none';
-    document.getElementById('browseNav').style.display = 'flex';
-    document.getElementById('learnNav').style.display  = 'none';
-    singleIdx = 0; singleFlipped = false; renderSingleCard();
+    btn.classList.remove('learn-active');
+    btn.textContent = '🎓 Režim učení';
+    document.getElementById('modeSubtitle').textContent   = 'Jedna karta po druhé';
+    document.getElementById('statRemaining').style.display= 'none';
+    document.getElementById('browseNav').style.display    = 'flex';
+    document.getElementById('learnNav').style.display     = 'none';
+    singleIdx = 0; singleFlipped = false;
+    renderSingleCard();
   }
 }
 
@@ -750,35 +834,52 @@ function init(cards) {
   knownCount     = 0;
   flippedSet.clear();
   learnMode = false;
+  singleIdx = 0; singleFlipped = false;
   document.getElementById('learnModeBtn').classList.remove('learn-active');
   document.getElementById('learnModeBtn').textContent = '🎓 Režim učení';
   document.getElementById('completion').style.display = 'none';
-  if (viewMode === 'grid') renderGrid(displayedCards);
-  else { singleIdx = 0; singleFlipped = false; renderSingleCard(); }
+  if (viewMode === 'grid') renderGrid();
+  else renderSingleCard();
 }
 
 /* ════════════════════════════════════════════════════
    EVENT LISTENERS
 ════════════════════════════════════════════════════ */
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active'); currentCat = btn.dataset.cat; init(getFiltered());
+document.querySelectorAll('.filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    init(getFiltered());
   });
 });
-document.getElementById('viewToggleBtn').addEventListener('click', () =>
-  setViewMode(viewMode === 'grid' ? 'single' : 'grid'));
+
+document.getElementById('viewToggleBtn').addEventListener('click', function() {
+  if (viewMode === 'grid') switchToSingle(); else switchToGrid();
+});
+
 document.getElementById('learnModeBtn').addEventListener('click', toggleLearnMode);
-document.getElementById('shuffleBtn').addEventListener('click', () => init(shuffle(getFiltered())));
-document.getElementById('resetBtn').addEventListener('click', () => init(getFiltered()));
-document.getElementById('prevBtn').addEventListener('click', () => goSingle(-1));
-document.getElementById('nextBtn').addEventListener('click', () => goSingle(1));
+
+document.getElementById('shuffleBtn').addEventListener('click', function() {
+  init(shuffle(getFiltered()));
+});
+
+document.getElementById('resetBtn').addEventListener('click', function() {
+  init(getFiltered());
+});
+
+document.getElementById('prevBtn').addEventListener('click', function() { goSingle(-1); });
+document.getElementById('nextBtn').addEventListener('click', function() { goSingle(1); });
+
 document.getElementById('nopeBtn').addEventListener('click', learnNope);
 document.getElementById('yepBtn').addEventListener('click',  learnYep);
-document.getElementById('restartBtn').addEventListener('click', () => {
+
+document.getElementById('restartBtn').addEventListener('click', function() {
   document.getElementById('completion').style.display = 'none';
   document.getElementById('singleView').style.display = 'flex';
-  learnMode ? startLearnMode() : (singleIdx = 0, singleFlipped = false, renderSingleCard());
+  singleFlipped = false;
+  if (learnMode) startLearnMode();
+  else { singleIdx = 0; renderSingleCard(); }
 });
 
 init(getFiltered());

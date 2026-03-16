@@ -1,1 +1,930 @@
-# dejepiskraticky.github.io
+<!DOCTYPE html>
+
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dějepis — Kartičky 2. světová válka</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Source+Sans+3:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════════════ */
+:root {
+  --bg:           #f4f6f9;
+  --surface:      #ffffff;
+  --border:       #dde3ec;
+  --text:         #1a2535;
+  --muted:        #6b7e99;
+
+–teal:         #0891b2;  –teal-d:    #065f7a;  –teal-pale:    #ecfafe;
+–purple:       #7c3aed;  –purple-d:  #4c1d95;  –purple-pale:  #f4f0ff;
+–red:          #dc2626;  –red-d:     #7f1d1d;  –red-pale:     #fff1f1;
+–crimson:      #be123c;  –crimson-d: #6b0d25;  –crimson-pale: #fff0f4;
+–blue:         #1d4ed8;  –blue-d:    #1e3a8a;  –blue-pale:    #eff4ff;
+–green:        #059669;  –green-d:   #064e3b;  –green-pale:   #ecfdf5;
+–navy:         #1e40af;  –navy-d:    #1e3a8a;  –navy-pale:    #eff6ff;
+–amber:        #d97706;  –amber-d:   #78350f;  –amber-pale:   #fffbeb;
+}
+
+- { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(–bg); color: var(–text); font-family: ‘Source Sans 3’, sans-serif; min-height: 100vh; }
+
+/* ════════════════════════════════════════════════════
+HEADER
+════════════════════════════════════════════════════ */
+header {
+background: #fff;
+border-bottom: 1px solid var(–border);
+padding: 16px 24px 0;
+position: sticky; top: 0; z-index: 100;
+box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.header-top { display: flex; align-items: baseline; gap: 12px; margin-bottom: 2px; }
+h1 { font-family: ‘Libre Baskerville’, serif; font-size: 1.35rem; font-weight: 700; color: var(–text); letter-spacing: -0.02em; }
+.subtitle { font-size: 0.78rem; color: var(–muted); font-style: italic; }
+
+.filters {
+display: flex; gap: 6px; flex-wrap: wrap;
+padding: 10px 0 12px; align-items: center;
+}
+.filter-btn {
+padding: 4px 13px; border-radius: 999px;
+border: 1.5px solid var(–border); background: transparent;
+color: var(–muted); font-size: 0.72rem; font-weight: 600;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer; transition: all 0.15s;
+}
+.filter-btn:hover { border-color: #8899b0; color: var(–text); background: var(–surface); }
+.filter-btn.active { border-color: transparent; color: #fff; font-weight: 700; }
+.filter-btn[data-cat=“vse”].active        { background: #334155; }
+.filter-btn[data-cat=“zahranici”].active  { background: var(–teal); }
+.filter-btn[data-cat=“domaci”].active     { background: var(–purple); }
+.filter-btn[data-cat=“heydrich”].active   { background: var(–red); }
+.filter-btn[data-cat=“anthropoid”].active { background: var(–crimson); }
+.filter-btn[data-cat=“overlord”].active   { background: var(–blue); }
+.filter-btn[data-cat=“belgie”].active     { background: var(–green); }
+.filter-btn[data-cat=“tehran”].active     { background: var(–navy); }
+.filter-btn[data-cat=“datumy”].active     { background: var(–amber); }
+
+.controls { margin-left: auto; display: flex; gap: 6px; align-items: center; }
+.ctrl-btn {
+padding: 4px 12px; border-radius: 7px;
+border: 1.5px solid var(–border); background: var(–surface);
+color: var(–text); font-size: 0.72rem; font-weight: 600;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+}
+.ctrl-btn:hover { background: var(–bg); border-color: #aab4c4; }
+.ctrl-btn.mode-active {
+background: #1e293b; color: #fff; border-color: #1e293b;
+}
+.ctrl-btn.learn-active {
+background: #059669; color: #fff; border-color: #059669;
+}
+
+/* ════════════════════════════════════════════════════
+STATS BAR
+════════════════════════════════════════════════════ */
+.stats-bar {
+padding: 8px 24px; font-size: 0.75rem; color: var(–muted);
+border-bottom: 1px solid var(–border); background: var(–surface);
+display: flex; gap: 20px; align-items: center;
+}
+.stat { display: flex; align-items: center; gap: 4px; }
+.stat strong { color: var(–text); }
+
+/* ════════════════════════════════════════════════════
+PROGRESS BAR
+════════════════════════════════════════════════════ */
+.progress-section {
+background: var(–surface);
+border-bottom: 1px solid var(–border);
+padding: 8px 24px 10px;
+display: flex; align-items: center; gap: 14px;
+}
+.progress-bar-wrap {
+flex: 1; height: 8px; background: #e8ecf2;
+border-radius: 999px; overflow: hidden;
+}
+.progress-bar-fill {
+height: 100%; width: 0%;
+background: linear-gradient(90deg, #059669, #10b981);
+border-radius: 999px;
+transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.progress-label {
+font-size: 0.73rem; font-weight: 600; color: var(–muted);
+white-space: nowrap; min-width: 110px; text-align: right;
+}
+.progress-label.complete { color: #059669; }
+
+/* ════════════════════════════════════════════════════
+GRID VIEW
+════════════════════════════════════════════════════ */
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+gap: 14px; padding: 20px 24px 56px;
+max-width: 1200px; margin: 0 auto;
+}
+.empty {
+grid-column: 1/-1; text-align: center;
+padding: 60px 20px; color: var(–muted); font-size: 1rem;
+}
+
+/* ════════════════════════════════════════════════════
+CARD — shared (grid + single)
+════════════════════════════════════════════════════ */
+.card-wrap {
+perspective: 1200px;
+cursor: pointer;
+}
+.card-inner {
+position: relative; width: 100%; height: 100%;
+transform-style: preserve-3d;
+transition: transform 0.52s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-wrap.flipped .card-inner { transform: rotateY(180deg); }
+
+.card-face {
+position: absolute; inset: 0; border-radius: 12px;
+display: flex; flex-direction: column; justify-content: space-between;
+padding: 14px 16px 12px; overflow: hidden;
+backface-visibility: hidden; -webkit-backface-visibility: hidden;
+box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.card-front {
+color: #fff; transform: rotateY(0deg);
+box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+}
+.card-front::after {
+content: ‘’; position: absolute; bottom: -24px; right: -24px;
+width: 90px; height: 90px; border-radius: 50%;
+background: rgba(255,255,255,0.08); pointer-events: none;
+backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.card-back { transform: rotateY(180deg); background: var(–surface); border: 2px solid transparent; }
+
+.card-cat  { font-size: 0.63rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; opacity: 0.75; position: relative; z-index: 1; }
+.card-type { font-size: 0.59rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.5; position: relative; z-index: 1; margin-top: 1px; }
+.card-q    { font-family: ‘Libre Baskerville’, serif; font-size: 0.96rem; line-height: 1.45; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; padding: 6px 2px; position: relative; z-index: 1; }
+.card-hint { font-size: 0.61rem; opacity: 0.4; text-align: right; position: relative; z-index: 1; letter-spacing: 0.04em; }
+.card-back .card-cat  { opacity: 1; font-size: 0.62rem; }
+.card-back .card-hint { opacity: 0.3; }
+.card-a { font-size: 0.9rem; font-weight: 600; line-height: 1.52; text-align: center; flex: 1; display: flex; align-items: center; justify-content: center; padding: 4px 2px; white-space: pre-line; }
+
+/* Grid card height */
+.grid .card-wrap { height: 200px; }
+
+/* Known dimming (grid only) */
+.grid .card-wrap.known .card-front { opacity: 0.3; }
+.known-btn {
+position: absolute; top: 8px; right: 8px;
+width: 22px; height: 22px; border-radius: 50%;
+border: 1.5px solid rgba(255,255,255,0.45); background: transparent;
+color: rgba(255,255,255,0.55); font-size: 11px; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+z-index: 10; transition: all 0.15s; line-height: 1;
+}
+.known-btn:hover { background: rgba(255,255,255,0.18); }
+.card-wrap.known .known-btn { background: rgba(255,255,255,0.25); color: #fff; border-color: rgba(255,255,255,0.8); }
+
+/* ════════════════════════════════════════════════════
+CATEGORY COLOURS
+════════════════════════════════════════════════════ */
+.cat-zahranici  .card-front { background: linear-gradient(135deg, var(–teal-d), var(–teal)); }
+.cat-zahranici  .card-back  { border-color: var(–teal); background: var(–teal-pale); }
+.cat-zahranici  .card-back .card-cat { color: var(–teal); }
+.cat-zahranici  .card-back .card-a   { color: var(–teal-d); }
+
+.cat-domaci     .card-front { background: linear-gradient(135deg, var(–purple-d), var(–purple)); }
+.cat-domaci     .card-back  { border-color: var(–purple); background: var(–purple-pale); }
+.cat-domaci     .card-back .card-cat { color: var(–purple); }
+.cat-domaci     .card-back .card-a   { color: var(–purple-d); }
+
+.cat-heydrich   .card-front { background: linear-gradient(135deg, #7a1010, var(–red)); }
+.cat-heydrich   .card-back  { border-color: var(–red); background: var(–red-pale); }
+.cat-heydrich   .card-back .card-cat { color: var(–red); }
+.cat-heydrich   .card-back .card-a   { color: var(–red-d); }
+
+.cat-anthropoid .card-front { background: linear-gradient(135deg, var(–crimson-d), var(–crimson)); }
+.cat-anthropoid .card-back  { border-color: var(–crimson); background: var(–crimson-pale); }
+.cat-anthropoid .card-back .card-cat { color: var(–crimson); }
+.cat-anthropoid .card-back .card-a   { color: var(–crimson-d); }
+
+.cat-overlord   .card-front { background: linear-gradient(135deg, var(–blue-d), var(–blue)); }
+.cat-overlord   .card-back  { border-color: var(–blue); background: var(–blue-pale); }
+.cat-overlord   .card-back .card-cat { color: var(–blue); }
+.cat-overlord   .card-back .card-a   { color: var(–blue-d); }
+
+.cat-belgie     .card-front { background: linear-gradient(135deg, var(–green-d), var(–green)); }
+.cat-belgie     .card-back  { border-color: var(–green); background: var(–green-pale); }
+.cat-belgie     .card-back .card-cat { color: var(–green); }
+.cat-belgie     .card-back .card-a   { color: var(–green-d); }
+
+.cat-tehran     .card-front { background: linear-gradient(135deg, var(–navy-d), var(–navy)); }
+.cat-tehran     .card-back  { border-color: var(–navy); background: var(–navy-pale); }
+.cat-tehran     .card-back .card-cat { color: var(–navy); }
+.cat-tehran     .card-back .card-a   { color: var(–navy-d); }
+
+.cat-datumy     .card-front { background: linear-gradient(135deg, var(–amber-d), var(–amber)); }
+.cat-datumy     .card-back  { border-color: var(–amber); background: var(–amber-pale); }
+.cat-datumy     .card-back .card-cat { color: var(–amber); }
+.cat-datumy     .card-back .card-a   { color: var(–amber-d); }
+
+/* ════════════════════════════════════════════════════
+SINGLE CARD VIEW
+════════════════════════════════════════════════════ */
+.single-view {
+max-width: 560px; margin: 32px auto 56px;
+padding: 0 24px; display: none; flex-direction: column; align-items: center; gap: 24px;
+}
+.single-card-area {
+width: 100%; position: relative;
+}
+.single-card-area .card-wrap {
+width: 100%; height: 260px;
+}
+
+/* Navigation row */
+.single-nav {
+width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.browse-nav, .learn-nav {
+display: flex; align-items: center; justify-content: center; gap: 16px; width: 100%;
+}
+.nav-btn {
+padding: 10px 24px; border-radius: 10px; border: 2px solid var(–border);
+background: var(–surface); color: var(–text); font-size: 0.85rem; font-weight: 700;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer; transition: all 0.15s;
+min-width: 120px;
+}
+.nav-btn:hover { background: var(–bg); border-color: #aab4c4; }
+.nav-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.nav-counter {
+font-family: ‘Libre Baskerville’, serif; font-size: 1rem; font-weight: 700;
+color: var(–text); min-width: 80px; text-align: center;
+}
+.nav-counter small { display: block; font-family: ‘Source Sans 3’, sans-serif; font-size: 0.65rem; font-weight: 400; color: var(–muted); margin-top: 2px; }
+
+/* Learning mode buttons */
+.learn-nope {
+padding: 12px 28px; border-radius: 10px; border: 2px solid #fca5a5;
+background: #fff1f1; color: #7f1d1d; font-size: 0.88rem; font-weight: 700;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer; transition: all 0.15s; min-width: 130px;
+}
+.learn-nope:hover { background: #fee2e2; border-color: #ef4444; }
+.learn-yep {
+padding: 12px 28px; border-radius: 10px; border: 2px solid #6ee7b7;
+background: #ecfdf5; color: #064e3b; font-size: 0.88rem; font-weight: 700;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer; transition: all 0.15s; min-width: 130px;
+}
+.learn-yep:hover { background: #d1fae5; border-color: #10b981; }
+
+/* hint below card in learning mode */
+.flip-hint {
+font-size: 0.73rem; color: var(–muted); text-align: center;
+opacity: 0; transition: opacity 0.2s; pointer-events: none;
+}
+.flip-hint.visible { opacity: 1; }
+
+/* ════════════════════════════════════════════════════
+COMPLETION SCREEN
+════════════════════════════════════════════════════ */
+.completion {
+display: none; max-width: 440px; margin: 48px auto 56px;
+padding: 0 24px; flex-direction: column; align-items: center; text-align: center; gap: 16px;
+}
+.completion-icon { font-size: 3.5rem; line-height: 1; }
+.completion h2 {
+font-family: ‘Libre Baskerville’, serif; font-size: 1.5rem;
+color: var(–text); font-weight: 700;
+}
+.completion p { font-size: 0.95rem; color: var(–muted); line-height: 1.6; }
+.completion-stats {
+background: #ecfdf5; border: 2px solid #6ee7b7; border-radius: 12px;
+padding: 16px 24px; width: 100%;
+font-size: 0.9rem; color: var(–green-d); font-weight: 600;
+}
+.restart-btn {
+padding: 12px 32px; border-radius: 10px; border: none;
+background: #059669; color: #fff; font-size: 0.9rem; font-weight: 700;
+font-family: ‘Source Sans 3’, sans-serif; cursor: pointer;
+transition: background 0.15s; margin-top: 4px;
+}
+.restart-btn:hover { background: #047857; }
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <h1>Kartičky — 2. světová válka</h1>
+    <span class="subtitle" id="modeSubtitle">Grid — všechny kartičky najednou</span>
+  </div>
+  <div class="filters">
+    <button class="filter-btn active" data-cat="vse">Vše</button>
+    <button class="filter-btn" data-cat="zahranici">Čs. zahraniční odboj</button>
+    <button class="filter-btn" data-cat="domaci">Domácí odboj</button>
+    <button class="filter-btn" data-cat="heydrich">Heydrich</button>
+    <button class="filter-btn" data-cat="anthropoid">Anthropoid</button>
+    <button class="filter-btn" data-cat="overlord">Overlord</button>
+    <button class="filter-btn" data-cat="belgie">Belgie</button>
+    <button class="filter-btn" data-cat="tehran">Teherán</button>
+    <button class="filter-btn" data-cat="datumy">📅 Jen datumy</button>
+    <div class="controls">
+      <button class="ctrl-btn" id="viewToggleBtn">▶ Jedna po druhé</button>
+      <button class="ctrl-btn" id="learnModeBtn" style="display:none">🎓 Režim učení</button>
+      <button class="ctrl-btn" id="shuffleBtn">⇄ Zamíchat</button>
+      <button class="ctrl-btn" id="resetBtn">↺ Reset</button>
+      <button class="ctrl-btn" id="hideKnownBtn">Skrýt zvládnuté</button>
+    </div>
+  </div>
+</header>
+
+<div class="stats-bar">
+  <span class="stat">Celkem: <strong id="countVisible">0</strong></span>
+  <span class="stat">Zvládnuto ✓: <strong id="countKnown">0</strong></span>
+  <span class="stat" id="statFlipped" style="display:none">Otočeno: <strong id="countFlipped">0</strong></span>
+  <span class="stat" id="statRemaining" style="display:none">Zbývá v učení: <strong id="countRemaining">0</strong></span>
+</div>
+
+<div class="progress-section">
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">0 / 0 zvládnuto — 0 %</div>
+</div>
+
+<!-- GRID VIEW -->
+
+<div class="grid" id="grid"></div>
+
+<!-- SINGLE CARD VIEW -->
+
+<div class="single-view" id="singleView">
+  <div class="single-card-area" id="singleCardArea"></div>
+  <div class="flip-hint" id="flipHint">⟵ Nejdřív otočte kartičku, pak rozhodněte</div>
+  <div class="single-nav">
+    <div class="browse-nav" id="browseNav">
+      <button class="nav-btn" id="prevBtn">← Předchozí</button>
+      <div class="nav-counter"><span id="singleCounter">1 / 0</span><small>kartička</small></div>
+      <button class="nav-btn" id="nextBtn">Další →</button>
+    </div>
+    <div class="learn-nav" id="learnNav" style="display:none">
+      <button class="learn-nope" id="nopeBtn">✗ Neumím</button>
+      <div class="nav-counter"><span id="learnCounter">0</span><small>zbývá</small></div>
+      <button class="learn-yep" id="yepBtn">✓ Zvládám</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPLETION -->
+
+<div class="completion" id="completion">
+  <div class="completion-icon">🎉</div>
+  <h2>Výborně!</h2>
+  <p>Zvládl/a jsi všechny kartičky v tomto setu.</p>
+  <div class="completion-stats" id="completionStats"></div>
+  <button class="restart-btn" id="restartBtn">↺ Zkusit znovu</button>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════
+   DATA
+════════════════════════════════════════════════════ */
+const CARDS = [
+  // ══ ČS. ZAHRANIČNÍ ODBOJ
+  { cat:'zahranici', type:'datum', q:'15. 3. 1939', a:'Němci začínají okupaci ČSR\n→ obsazení zbytku republiky' },
+  { cat:'zahranici', type:'datum', q:'16. 3. 1939', a:'Vyhlášení Protektorátu Čechy a Morava' },
+  { cat:'zahranici', type:'datum', q:'10. 6. 1942', a:'Vypálení Lidic\n→ pomohlo odúznání Mnichovské dohody' },
+  { cat:'zahranici', type:'osoba', q:'Emil Hácha', a:'Prezident protektorátu\n(kolaborant)' },
+  { cat:'zahranici', type:'osoba', q:'Alois Eliáš', a:'Předseda vlády protektorátu\n(tajně spolupracoval s odbojem)' },
+  { cat:'zahranici', type:'osoba', q:'K. H. Frank', a:'Státní sekretář protektorátu\n— faktická německá moc' },
+  { cat:'zahranici', type:'osoba', q:'Edvard Beneš', a:'Předseda zahraničního odboje\n→ exilový prezident ve VB' },
+  { cat:'zahranici', type:'osoba', q:'Monseňor Jan Šrámek', a:'Předseda exilové vlády ve VB\n(Beneš = předseda odboje, Šrámek = premiér)' },
+  { cat:'zahranici', type:'osoba', q:'Jan Masaryk', a:'Ministr zahraničí exilové vlády\nJednal s Brity — syn T. G. Masaryka' },
+  { cat:'zahranici', type:'osoba', q:'Milan Hodža', a:'Bývalý premiér ČSR\nOdpůrce Beneše v exilu' },
+  { cat:'zahranici', type:'osoba', q:'Štefan Osuský', a:'Slovenský politik — rival Beneše\nPasoval se do čela zahraničního odboje\nPo pádu Francie ztratil podporu → Beneš vítězí' },
+  { cat:'zahranici', type:'osoba', q:'Ludvík Svoboda', a:'Plukovník — velitel čs. vojenských\njednotek v zahraničí (Polsko → Francie → VB)' },
+  { cat:'zahranici', type:'osoba', q:'Alois Vašátko & František Peřina', a:'Čs. piloti s nejvíce sestřely\nv bitvě o Francii' },
+  { cat:'zahranici', type:'osoba', q:'Karel Klapálek', a:'Velitel čs. vojáků v sev. Africe\n(Tobruk)' },
+  { cat:'zahranici', type:'osoba', q:'Otto Smik', a:'Nejlepší čs. stíhač u D-Day\n(operace Overlord)' },
+  { cat:'zahranici', type:'pojem', q:'Co je Protektorát Čechy a Morava?', a:'Území obsazené Německem od 16. 3. 1939\nFormálně autonomní, fakticky ovládané Němci' },
+  { cat:'zahranici', type:'pojem', q:'Kde vznikla exilová vláda ČS?', a:'Ve Velké Británii (Londýn)\nPo pádu Francie 1940' },
+  { cat:'zahranici', type:'pojem', q:'Trasa útěku do exilu', a:'Přes Polsko nebo Maďarsko → Jugoslávie\nPolsko odmítlo čs. vojáky — Francie ochotna\n(cizinecké jednotky)\nPo pádu Francie (1940) → Londýn' },
+  { cat:'zahranici', type:'pojem', q:'Mnichovská dohoda — odúznání', a:'Churchill oduznal od 15. 3. 1939\n= platnost nulována od vzniku protektorátu\nČS získalo zpět i Podkarpatskou Rus' },
+  { cat:'zahranici', type:'pojem', q:'Co přimělo Churchilla k odúznání MD?', a:'Vypálení Lidic 10. 6. 1942\n— celý svět se dozvěděl, obrovský ohlas' },
+  { cat:'zahranici', type:'pojem', q:'311. peruť', a:'Čs. bombardovací peruť ve VB\nÚčastnila se D-Day — hlídala vylodění\na bojovala s německými ponorkami' },
+  { cat:'zahranici', type:'pojem', q:'Na koho se Beneš orientoval geopoliticky?', a:'Na SSSR\n(jako záštitu poválečného Československa)' },
+
+  // ══ DOMÁCÍ ODBOJ
+  { cat:'domaci', type:'datum', q:'28. 10. 1939', a:'Masová demonstrace na počest vzniku ČS\n→ zemřeli Jan Opletal a Sedláček' },
+  { cat:'domaci', type:'osoba', q:'Jan Opletal', a:'Student — zemřel po zranění\nz demonstrace 28. 10. 1939\n→ stal se symbolem odboje' },
+  { cat:'domaci', type:'osoba', q:'Milada Horáková', a:'Vedla PVZ (protikomunistická org.)\nPo válce popravena komunisty (1950)' },
+  { cat:'domaci', type:'osoba', q:'A. Rašín', a:'Vedl PÚ — Politické ústředí\n(protinacistická org.)' },
+  { cat:'domaci', type:'osoba', q:'Docent Vladimír Krajina', a:'Vedl ÚVOD — koordinoval\nON + PVZ + PÚ' },
+  { cat:'domaci', type:'osoba', q:'Paul Thümmel — agent A54', a:'Člen německé organizace, málo placený\nProdával informace čs. odboji\n→ klíčový zpravodajský zdroj' },
+  { cat:'domaci', type:'pojem', q:'ON = ?', a:'Obrana národa\nBývalí vojáci čs. armády\nVelitelé: gen. Homola, gen. Bílý\nSpoléhali na prohru Německa' },
+  { cat:'domaci', type:'pojem', q:'Tři králové — kdo a co?', a:'Mašín, Balabán, Morávek\nProtinacistická skupina\nSabotáže na železnici\nKontakt s agentem A54' },
+  { cat:'domaci', type:'pojem', q:'PVZ = ?', a:'Petiční výbor věrni zůstaneme\nProtikomunistická orientace\nVedla: Milada Horáková\nŠpionáž z protektorátu → Londýn' },
+  { cat:'domaci', type:'pojem', q:'PÚ = ?', a:'Politické ústředí\nProtinacistické zaměření\nVedl: A. Rašín' },
+  { cat:'domaci', type:'pojem', q:'ÚVOD = ?', a:'Ústřední vedení odboje domácího\nZastřešující org.\nVedl: doc. V. Krajina\nKoordinoval ON + PVZ + PÚ' },
+  { cat:'domaci', type:'pojem', q:'OSVO = ?', a:'Obec sokolská v odboji\nObranná organizace Sokola\nPoskytovala zázemí a kontakty pro parašutisty' },
+  { cat:'domaci', type:'pojem', q:'KSČ v domácím odboji', a:'Komunistická strana čs.\nStála mimo ostatní organizace\nGottwald, Zápotocký, Novotný, Fučík\nPo válce převzala moc, perzekuovala členy PVZ' },
+  { cat:'domaci', type:'pojem', q:'Jaké formy měl domácí odboj?', a:'Vydej ilegálního tisku\nSabotáže (železnice, průmysl)\nŠpionáž pro Londýn' },
+
+  // ══ HEYDRICH
+  { cat:'heydrich', type:'datum', q:'27. 9. 1941', a:'Heydrich nastupuje jako\nzastupující říšský protektor' },
+  { cat:'heydrich', type:'datum', q:'28. 9. 1941', a:'Heydrich vyhlašuje stanné právo\n— zpřísnění podmínek pro celou populaci\n(den po nástupu do úřadu)' },
+  { cat:'heydrich', type:'datum', q:'8. 10. 1941', a:'Pozatýkáno 8 členů Sokola\n→ ostatní se rozhodli pomstít' },
+  { cat:'heydrich', type:'osoba', q:'Reinhard Heydrich', a:'Zastupující říšský protektor od 27. 9. 1941\nNahradil Konstantina von Neuratha\nCíl: zničit odboj, germanizovat české země' },
+  { cat:'heydrich', type:'osoba', q:'Konstantin von Neurath', a:'1. říšský protektor (od 1939)\nNedokázal zlomit odboj\nNahrazen Heydrichem 27. 9. 1941' },
+  { cat:'heydrich', type:'osoba', q:'H. Vojta a gen. Bílý', a:'První oběti Heydrichových výslechů\nDůstojníci — přátelé F. Moravce z Londýna' },
+  { cat:'heydrich', type:'pojem', q:'Politika cukru a biče — vysvětli', a:'CUKR = odměny (úlevy, zvýšení dávek)\n→ loajalita, chuť přežít\nBIČ = tresty (KT, poprava, stanné právo)\n→ strach jako nástroj kontroly' },
+  { cat:'heydrich', type:'pojem', q:'Jakou roli hrál Terezín?', a:'Sběrné místo pro deportace Židů na východ\nVznikl na Heydrichův popud (podzim 1941)\nNejprve transportní bod → pak přesun\ndo vyhlazovacích táborů' },
+  { cat:'heydrich', type:'pojem', q:'Jaké metody používalo gestapo při výsleších?', a:'Kyseliny do van\nTrhání nehtů\nFyzické týrání\nHeydrich výslechy osobně dohlížel' },
+  { cat:'heydrich', type:'pojem', q:'Proč Heydrich nahradil Konstantina?', a:'Konstantin nezabral — nebyl dostatečně tvrdý\nNedokázal zlomit odbojové sítě\nHeydrich dostal mandát zničit odboj' },
+
+  // ══ ANTHROPOID
+  { cat:'anthropoid', type:'datum', q:'2. 10. 1941', a:'F. Moravec navrhuje operaci Anthropoid\n— plán na likvidaci Heydricha' },
+  { cat:'anthropoid', type:'datum', q:'29. 12. 1941', a:'Kubiš + Gabčík vysazeni\nv protektorátu (skok padákem)' },
+  { cat:'anthropoid', type:'datum', q:'27. 5. 1942', a:'ATENTÁT na Heydricha u Kobylisu\nGabčík selhal, Kubiš hodil granát → slezina' },
+  { cat:'anthropoid', type:'datum', q:'4. 6. 1942', a:'Heydrich zemřel na sepsi\n(infekce z žíní sedadla v ráně)' },
+  { cat:'anthropoid', type:'datum', q:'10. 6. 1942', a:'Vypálení Lidic\nMuži postříleni, ženy do Chelmna (plyn)\nDěti — část na převýchovu' },
+  { cat:'anthropoid', type:'datum', q:'18. 6. 1942', a:'SS a gestapo oblíčili kostel\nCyrila a Metoděje v Praze\n→ parašutisté padli' },
+  { cat:'anthropoid', type:'datum', q:'24. 6. 1942', a:'Vypálení Ležáků\n— pomáhali parašutistovi J. Potůčkovi' },
+  { cat:'anthropoid', type:'datum', q:'24. 10. 1942', a:'Popravy v Mauthausenu\n— všichni zjištění pomocníci operace Anthropoid' },
+  { cat:'anthropoid', type:'osoba', q:'František Moravec', a:'Navrhl operaci Anthropoid (2. 10. 1941)\nVojenský zpravodajec — koordinoval z Londýna' },
+  { cat:'anthropoid', type:'osoba', q:'Jan Kubiš', a:'Parašutista — hodil granát na Heydricha\nČech — exilový voják\nPadl 18. 6. 1942 v kostele' },
+  { cat:'anthropoid', type:'osoba', q:'Jozef Gabčík', a:'Parašutista — jeho Sten selhal\nSlovák — exilový voják\nPadl 18. 6. 1942 v kostele' },
+  { cat:'anthropoid', type:'osoba', q:'Rodina Moravcových', a:'Poskytovali zázemí parašutistům\n(jídlo, informace, úkryt)\nFalešné přídělové lístky jako krytí' },
+  { cat:'anthropoid', type:'osoba', q:'Karel Čurda', a:'Zradil parašutisty gestapě\n(výměnou za amnestii a peníze)\nPo válce popraven jako zrádce' },
+  { cat:'anthropoid', type:'osoba', q:'Ata Moravec', a:'Syn paní Moravcové\nPod nátlakem gestapa prozradil\npřesný úkryt parašutistů' },
+  { cat:'anthropoid', type:'osoba', q:'Jan Potůček', a:'Parašutista — pomáhaly mu Ležáky\nProto byly Ležáky vypáleny 24. 6. 1942' },
+  { cat:'anthropoid', type:'pojem', q:'SOE = ?', a:'Special Operations Executive\nBritská tajná organizace\nŠpionáž a sabotáže v okkupovaných územích\nKoordinovala operaci Anthropoid' },
+  { cat:'anthropoid', type:'pojem', q:'Proč atentát u Kobylisu?', a:'Zatáčka — Heydrich musel zpomalit\nIdeální místo pro útok\nParašutisté to pečlivě vybrali' },
+  { cat:'anthropoid', type:'pojem', q:'Jak přesně proběhl atentát 27. 5. 1942?', a:'Gabčík vytáhl Sten → selhal\nKubiš hodil granát → zasáhl slezinu a karosérii\nKubiš dostal střepinu do tváře\nŠofér Klein honil Gabčíka → oba uprchli' },
+  { cat:'anthropoid', type:'pojem', q:'Proč selhal Gabčíkův Sten?', a:'Přesná příčina nejasná\nMožná tráva pro králíky v tašce ucpala mechanismus\nSten neselhání = Kubiš hodil granát' },
+  { cat:'anthropoid', type:'pojem', q:'Proč zemřel Heydrich (ne přímo při atentátu)?', a:'Sepse — infekce z žíní sedadla\nkteré pronikly do rány při výbuchu\nZemřel 4. 6. 1942 — 8 dní po atentátu' },
+  { cat:'anthropoid', type:'pojem', q:'Jak Němci přišli na Lidice?', a:'2 falešné stopy:\n① Horák + Stříbrný (utekli do VB, RAF)\n② Dopis V. Říhy přítelkyni — Němci špatně pochopili\nGestapo zjistilo, že stopy nikam nevedou\n→ přesto Lidice zlikvidovaly jako zastrašení' },
+  { cat:'anthropoid', type:'pojem', q:'Co se stalo ženám z Lidic?', a:'Odvezeny do Chelmna\n→ usmrceny plynem\nPár dětí odpovídajících něm. ideálu\n→ převýchova (po válce návrat)' },
+  { cat:'anthropoid', type:'pojem', q:'Kostel Cyrila a Metoděje — co se tam stalo?', a:'Úkryt parašutistů po atentátu\nNejprve uvažovali o vzdání se → rozhodli se bojovat\nČurda zradil → Ata Moravec prozradil\n18. 6. 1942: přestřelka, granáty → padli' },
+
+  // ══ OVERLORD
+  { cat:'overlord', type:'datum', q:'6. 6. 1944', a:'D-Day — vylodění v Normandii\nNejvětší námořní operace v historii' },
+  { cat:'overlord', type:'datum', q:'19.–25. 8. 1944', a:'Pařížské povstání\n→ osvobození Paříže (25. 8.)' },
+  { cat:'overlord', type:'datum', q:'25. 8. 1944', a:'Osvobození Paříže\nDe Gaulle vstupuje do města' },
+  { cat:'overlord', type:'osoba', q:'Dwight D. Eisenhower', a:'Vrchní velitel Spojenců\nKoordinoval celou operaci Overlord' },
+  { cat:'overlord', type:'osoba', q:'Gen. Patton (USA)', a:'Velel americkým silám\nKlíčová role při průlomu z Normandie' },
+  { cat:'overlord', type:'osoba', q:'Maršál Montgomery (VB)', a:'Velel britským a kanadským silám\nZkušený z africké fronty (el-Alamein)' },
+  { cat:'overlord', type:'osoba', q:'Charles de Gaulle', a:'Vůdce Svobodné Francie\nVstoupil do Paříže 25. 8. 1944\n→ symbolický návrat legitimní vlády' },
+  { cat:'overlord', type:'osoba', q:'Gen. Choltitz', a:'Velitel německé posádky v Paříži\nOdmítl Hitlerův rozkaz zničit město\nVzdal se 25. 8. 1944' },
+  { cat:'overlord', type:'pojem', q:'Operace Overlord — co to je?', a:'Krycí název pro vylodění v Normandii\nOtevření 2. fronty na západ (6. 6. 1944)\nDohodnuto na Teheránské konferenci 1943' },
+  { cat:'overlord', type:'pojem', q:'Atlantický val', a:'Německé opevnění podél pobřeží záp. Evropy\nMělo zastavit spojenecké vylodění\nRozbito při D-Day' },
+  { cat:'overlord', type:'pojem', q:'Operace Fortitude', a:'Spojenecká dezinformační operace před D-Day\nPřesvědčila Němce, že útok bude u Calais\nNástroje: Enigma, double agenti, falešné armády\n→ Normandie = naprosté překvapení' },
+  { cat:'overlord', type:'pojem', q:'Proč Normandie a ne Calais?', a:'Němci čekali útok u Calais (nejkratší přechod)\nSpojenecká dezinformace — operace Fortitude\nNormandie = překvapení → větší šance na úspěch' },
+  { cat:'overlord', type:'pojem', q:'5 sektorů vylodění v Normandii', a:'USA: Utah + Omaha\nVB + Kanada: Gold + Juno + Sword\nOmaha = nejtěžší boje (Němci na útesech)' },
+  { cat:'overlord', type:'pojem', q:'Omaha Beach', a:'Nejtěžší sektor vylodění (USA)\nNěmci měli silné pozice na útesech\nVelké ztráty, ale přesto průlom' },
+  { cat:'overlord', type:'pojem', q:'Jak se účastnily čs. jednotky u D-Day?', a:'311. peruť — hlídala vylodění, ponorky\nStíhači — kryli vzdušný prostor\nNejlepší: Otto Smik' },
+  { cat:'overlord', type:'pojem', q:'Proč Paříž chtěla být osvobozena sama?', a:'Lepší poválečný politický vliv\nDe Gaulle chtěl vstoupit jako osvoboditel\nEisenhower nakonec povolil vstup franc. jednotek' },
+
+  // ══ BELGIE
+  { cat:'belgie', type:'datum', q:'2. 9. 1944', a:'Osvobození Bruselu\nBritské jednotky (Guards Armoured Division)' },
+  { cat:'belgie', type:'datum', q:'4. 9. 1944', a:'Osvobození Antverp\n— klíčový zásobovací přístav Spojenců' },
+  { cat:'belgie', type:'datum', q:'28. 11. 1944', a:'Antverpy plně zprovozněny\npro zásobovací trasy Spojenců' },
+  { cat:'belgie', type:'datum', q:'16. 12. 1944', a:'Hitler spouští Ardenskou ofenzívu\nOperace Wacht am Rhein\n→ poslední německý protiúder na západ' },
+  { cat:'belgie', type:'datum', q:'Leden 1945', a:'Němci vytlačeni z Ardenů\n→ Patton prolomil obklíčení Bastogne\n→ konec ofenzívy, Němci vyčerpali zálohy' },
+  { cat:'belgie', type:'pojem', q:'Proč byly Antverpy tak důležité?', a:'Největší přístav v záp. Evropě\nKlíčový pro zásobování Spojenců\nBez Antverp nebylo možné udržet postup' },
+  { cat:'belgie', type:'pojem', q:'Bitva o Šeldu', a:'Říjen–listopad 1944\nKanaďané vyčistili okolí řeky Šeldy\n→ Antverpy plně zprovozněny 28. 11.' },
+  { cat:'belgie', type:'pojem', q:'Belgická Résistance', a:'Belgické odbojové hnutí\nAktivně pomáhalo Spojencům\nSabotáže, špionáž, ukrývání vojáků\n(Belgie pod okkupací od května 1940)' },
+  { cat:'belgie', type:'pojem', q:'Operace Wacht am Rhein', a:'Hitlerův poslední protiútok na záp. frontě\nÚtok přes Ardeny (16. 12. 1944)\nCíl: dobýt Antverpy, rozdělit Spojence' },
+  { cat:'belgie', type:'pojem', q:'Bastogne — co se tam stalo?', a:'Klíčový dopravní uzel v Ardenách\n101. výsadková divize USA obklíčena\nOdmítla kapitulovat — slavná odpověď "Nuts!"\nPatton otočil 3. armádu → prolomil obklíčení' },
+  { cat:'belgie', type:'pojem', q:'Výsledek Ardenské ofenzívy', a:'Němci vytlačeni zpět (leden 1945)\nNěmecko vyčerpalo poslední strategické zálohy\nSpojenec překročili Rýn → cesta do Německa\n→ kapitulace Německa 8. 5. 1945' },
+  { cat:'belgie', type:'pojem', q:'Kdy byla Belgie pod německou ocupací?', a:'Od května 1940 (Hitlerův blitzkrieg)\ndo září 1944 (osvobozování po D-Day)' },
+
+  // ══ TEHERÁN
+  { cat:'tehran', type:'datum', q:'28. 11. – 1. 12. 1943', a:'Teheránská konference\nPrvní setkání Velké trojky\n(Stalin + Roosevelt + Churchill)' },
+  { cat:'tehran', type:'pojem', q:'Velká trojka — kdo?', a:'Joseph Stalin (SSSR)\nFranklin D. Roosevelt (USA)\nWinston Churchill (Velká Británie)' },
+  { cat:'tehran', type:'pojem', q:'Proč se konference konala v Teheránu?', a:'Írán pod sovětskou kontrolou od 1941\nÍránci sympatizovali s Německem\nSovietsky hlídané území = bezpečná neutrální půda' },
+  { cat:'tehran', type:'pojem', q:'O čem se jednalo v Teheránu?', a:'1. Kde otevřít 2. frontu\n2. Koordinace operací západ + východ\n3. Podpora SSSR v Pacifiku\n4. Základ poválečného pořádku' },
+  { cat:'tehran', type:'pojem', q:'Spor o 2. frontu — Churchill vs. ostatní', a:'Churchill: Balkán\n(strategický zájem, ale pomalý hornatý terén)\nRoosevelt + Stalin: Francie\n(rovný terén, přímá cesta do Německa)\n→ VÝSLEDEK: Francie = D-Day 1944' },
+  { cat:'tehran', type:'pojem', q:'Co SSSR slíbilo v Teheránu?', a:'Vstoupit do války v Pacifiku\npo porážce Německa\n(splněno: srpen 1945)' },
+  { cat:'tehran', type:'pojem', q:'Co Stalin žádal ohledně Polska?', a:'Uznání hranic s Polskem z roku 1939\n(sporné, odloženo)\nPodrobnosti řešeny ve Jaltě 1945' },
+  { cat:'tehran', type:'pojem', q:'Výsledky Teheránské konference', a:'✓ 2. fronta ve Francii (D-Day 1944)\n✓ Koordinace spojeneckých operací\n✓ SSSR v Pacifiku po porážce Německa\n✓ Základ poválečného uspořádání Evropy' },
+  { cat:'tehran', type:'pojem', q:'Jalta 1945 — navazující konference', a:'Únor 1945\nVelká trojka řešila rozdělení Německa\na uspořádání poválečné Evropy' },
+  { cat:'tehran', type:'pojem', q:'Postupim 1945 — finální konference', a:'Červenec–srpen 1945\nFinální konference vítězných mocností\nRozhodnutí o rozdělení Německa\n→ čtyři ocupační zóny (USA, VB, FR, SSSR)' },
+
+  // ══ DATUMY — PŘEHLED
+  { cat:'datumy', type:'datum', q:'15. 3. 1939', a:'Němci obsazují ČSR' },
+  { cat:'datumy', type:'datum', q:'16. 3. 1939', a:'Vyhlášení Protektorátu Čechy a Morava' },
+  { cat:'datumy', type:'datum', q:'28. 10. 1939', a:'Demonstrace → J. Opletal a Sedláček' },
+  { cat:'datumy', type:'datum', q:'27. 9. 1941', a:'Heydrich nastupuje jako zastupující protektor' },
+  { cat:'datumy', type:'datum', q:'28. 9. 1941', a:'Heydrich vyhlašuje stanné právo' },
+  { cat:'datumy', type:'datum', q:'8. 10. 1941', a:'Pozatýkáno 8 členů Sokola' },
+  { cat:'datumy', type:'datum', q:'2. 10. 1941', a:'Moravec navrhuje operaci Anthropoid' },
+  { cat:'datumy', type:'datum', q:'29. 12. 1941', a:'Kubiš + Gabčík vysazeni v protektorátu' },
+  { cat:'datumy', type:'datum', q:'27. 5. 1942', a:'Atentát na Heydricha u Kobylisu' },
+  { cat:'datumy', type:'datum', q:'4. 6. 1942', a:'Heydrich zemřel (sepse)' },
+  { cat:'datumy', type:'datum', q:'10. 6. 1942', a:'Vypálení Lidic' },
+  { cat:'datumy', type:'datum', q:'18. 6. 1942', a:'Útok na kostel Cyrila a Metoděje' },
+  { cat:'datumy', type:'datum', q:'24. 6. 1942', a:'Vypálení Ležáků' },
+  { cat:'datumy', type:'datum', q:'24. 10. 1942', a:'Popravy v Mauthausenu (pomocníci Anthropoidu)' },
+  { cat:'datumy', type:'datum', q:'28. 11. – 1. 12. 1943', a:'Teheránská konference (Velká trojka)' },
+  { cat:'datumy', type:'datum', q:'6. 6. 1944', a:'D-Day — vylodění v Normandii (Overlord)' },
+  { cat:'datumy', type:'datum', q:'19.–25. 8. 1944', a:'Pařížské povstání → osvobození Paříže' },
+  { cat:'datumy', type:'datum', q:'2. 9. 1944', a:'Osvobození Bruselu' },
+  { cat:'datumy', type:'datum', q:'4. 9. 1944', a:'Osvobození Antverp' },
+  { cat:'datumy', type:'datum', q:'16. 12. 1944', a:'Ardenská ofenzíva (Wacht am Rhein)' },
+  { cat:'datumy', type:'datum', q:'28. 11. 1944', a:'Antverpy plně zprovozněny pro zásobování' },
+  { cat:'datumy', type:'datum', q:'Leden 1945', a:'Němci vytlačeni z Ardenů → Patton prolomil Bastogne' },
+];
+
+/* ════════════════════════════════════════════════════
+   CONSTANTS
+════════════════════════════════════════════════════ */
+const TYPE_LABELS = { datum:'📅 Datum', osoba:'👤 Osoba', pojem:'📖 Pojem' };
+const CAT_NAMES   = {
+  zahranici:'Čs. zahraniční odboj', domaci:'Domácí odboj',
+  heydrich:'Heydrich', anthropoid:'Anthropoid', overlord:'Overlord',
+  belgie:'Belgie', tehran:'Teherán', datumy:'Přehled dat',
+};
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+let currentCat     = 'vse';
+let viewMode       = 'grid';        // 'grid' | 'single'
+let learnMode      = false;
+let displayedCards = [];            // current filtered (+ possibly shuffled) set
+let knownSet       = new Set();     // indices into displayedCards
+let flippedSet     = new Set();     // grid only
+let hideKnown      = false;
+
+// single-card browse
+let singleIdx      = 0;
+let singleFlipped  = false;
+
+// learning queue: array of indices into displayedCards
+let learnQueue     = [];
+let learnStartCount = 0;
+
+/* ════════════════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════════════════ */
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function getFiltered() {
+  return currentCat === 'vse' ? CARDS : CARDS.filter(c => c.cat === currentCat);
+}
+
+function buildCard(card, extraClass = '') {
+  const wrap = document.createElement('div');
+  wrap.className = `card-wrap cat-${card.cat}${extraClass ? ' ' + extraClass : ''}`;
+  wrap.innerHTML = `
+    <div class="card-inner">
+      <div class="card-face card-front">
+        <div>
+          <div class="card-cat">${CAT_NAMES[card.cat] || card.cat}</div>
+          <div class="card-type">${TYPE_LABELS[card.type] || card.type}</div>
+        </div>
+        <div class="card-q">${card.q}</div>
+        <div class="card-hint">klikni pro odpověď →</div>
+      </div>
+      <div class="card-face card-back">
+        <div class="card-cat">${TYPE_LABELS[card.type] || ''}</div>
+        <div class="card-a">${card.a}</div>
+        <div class="card-hint">klikni zpět ←</div>
+      </div>
+    </div>`;
+  return wrap;
+}
+
+/* ════════════════════════════════════════════════════
+   PROGRESS BAR
+════════════════════════════════════════════════════ */
+function updateProgress() {
+  const total  = displayedCards.length;
+  const known  = knownSet.size;
+  const pct    = total > 0 ? Math.round((known / total) * 100) : 0;
+  const fill   = document.getElementById('progressFill');
+  const label  = document.getElementById('progressLabel');
+  fill.style.width = pct + '%';
+  label.textContent = `${known} / ${total} zvládnuto — ${pct} %`;
+  label.classList.toggle('complete', pct === 100 && total > 0);
+  document.getElementById('countVisible').textContent = total;
+  document.getElementById('countKnown').textContent   = known;
+}
+
+/* ════════════════════════════════════════════════════
+   GRID RENDER
+════════════════════════════════════════════════════ */
+function renderGrid(cards) {
+  displayedCards = cards;
+  knownSet.clear(); flippedSet.clear();
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  const visible = hideKnown ? cards.filter((_, i) => !knownSet.has(i)) : cards;
+
+  if (visible.length === 0) {
+    grid.innerHTML = '<div class="empty">Žádné kartičky — zkus jiný filtr.</div>';
+    updateProgress(); return;
+  }
+
+  visible.forEach((card) => {
+    const origIdx = cards.indexOf(card);
+    const wrap    = buildCard(card);
+    if (knownSet.has(origIdx)) wrap.classList.add('known');
+    wrap.dataset.idx = origIdx;
+
+    // add known-btn to front face
+    const front = wrap.querySelector('.card-front');
+    const kb = document.createElement('button');
+    kb.className = 'known-btn'; kb.title = 'Označit jako zvládnuté'; kb.textContent = '✓';
+    front.appendChild(kb);
+
+    wrap.addEventListener('click', (e) => {
+      if (e.target.classList.contains('known-btn')) return;
+      wrap.classList.toggle('flipped');
+      const idx = parseInt(wrap.dataset.idx);
+      if (wrap.classList.contains('flipped')) flippedSet.add(idx);
+      else flippedSet.delete(idx);
+      document.getElementById('countFlipped').textContent = flippedSet.size;
+    });
+
+    kb.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idx = parseInt(wrap.dataset.idx);
+      if (knownSet.has(idx)) knownSet.delete(idx);
+      else knownSet.add(idx);
+      wrap.classList.toggle('known', knownSet.has(idx));
+      if (hideKnown && knownSet.has(idx)) wrap.remove();
+      updateProgress();
+    });
+
+    grid.appendChild(wrap);
+  });
+
+  updateProgress();
+}
+
+/* ════════════════════════════════════════════════════
+   SINGLE CARD RENDER
+════════════════════════════════════════════════════ */
+function renderSingleCard() {
+  const area = document.getElementById('singleCardArea');
+  area.innerHTML = '';
+
+  if (displayedCards.length === 0) {
+    area.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px 0">Žádné kartičky v tomto filtru.</p>';
+    return;
+  }
+
+  // Clamp singleIdx
+  singleIdx = Math.max(0, Math.min(singleIdx, displayedCards.length - 1));
+  const card = displayedCards[singleIdx];
+  const wrap = buildCard(card);
+  if (singleFlipped) wrap.classList.add('flipped');
+
+  wrap.addEventListener('click', () => {
+    singleFlipped = !singleFlipped;
+    wrap.classList.toggle('flipped', singleFlipped);
+    // In learn mode, reveal action buttons after flip
+    if (learnMode) {
+      document.getElementById('nopeBtn').disabled = !singleFlipped;
+      document.getElementById('yepBtn').disabled  = !singleFlipped;
+      document.getElementById('flipHint').classList.toggle('visible', !singleFlipped);
+    }
+  });
+
+  area.appendChild(wrap);
+
+  // update counter
+  document.getElementById('singleCounter').textContent = `${singleIdx + 1} / ${displayedCards.length}`;
+  document.getElementById('prevBtn').disabled = (singleIdx === 0);
+  document.getElementById('nextBtn').disabled = (singleIdx === displayedCards.length - 1);
+
+  updateProgress();
+}
+
+function goSingle(dir) {
+  singleIdx += dir;
+  singleFlipped = false;
+  renderSingleCard();
+}
+
+/* ════════════════════════════════════════════════════
+   LEARNING MODE
+════════════════════════════════════════════════════ */
+function startLearnMode() {
+  // Build queue from non-known cards
+  learnQueue = displayedCards
+    .map((_, i) => i)
+    .filter(i => !knownSet.has(i));
+  learnQueue = shuffle(learnQueue);
+  learnStartCount = learnQueue.length;
+  renderLearnCard();
+}
+
+function renderLearnCard() {
+  if (learnQueue.length === 0) { showCompletion(); return; }
+  singleFlipped = false;
+  const idx  = learnQueue[0];
+  const card = displayedCards[idx];
+  const area = document.getElementById('singleCardArea');
+  area.innerHTML = '';
+
+  const wrap = buildCard(card);
+  wrap.addEventListener('click', () => {
+    singleFlipped = !singleFlipped;
+    wrap.classList.toggle('flipped', singleFlipped);
+    document.getElementById('nopeBtn').disabled = !singleFlipped;
+    document.getElementById('yepBtn').disabled  = !singleFlipped;
+    document.getElementById('flipHint').classList.toggle('visible', !singleFlipped);
+  });
+  area.appendChild(wrap);
+
+  // buttons start disabled until card flipped
+  document.getElementById('nopeBtn').disabled = true;
+  document.getElementById('yepBtn').disabled  = true;
+  document.getElementById('flipHint').classList.add('visible');
+
+  document.getElementById('learnCounter').textContent = learnQueue.length;
+  updateProgress();
+}
+
+function learnNope() {
+  // rotate current card to end of queue
+  const idx = learnQueue.shift();
+  learnQueue.push(idx);
+  renderLearnCard();
+}
+
+function learnYep() {
+  // mark known, remove from queue
+  const idx = learnQueue.shift();
+  knownSet.add(idx);
+  renderLearnCard();
+}
+
+function showCompletion() {
+  document.getElementById('singleView').style.display   = 'none';
+  document.getElementById('completion').style.display   = 'flex';
+  const total = displayedCards.length;
+  document.getElementById('completionStats').innerHTML =
+    `Zvládnuto: <strong>${knownSet.size} / ${total}</strong> kartičky${learnStartCount > 0 ? `<br>Bylo potřeba opakování: ${learnStartCount + knownSet.size - total > 0 ? learnStartCount + knownSet.size - total : 0}×` : ''}`;
+  updateProgress();
+}
+
+/* ════════════════════════════════════════════════════
+   VIEW MODE SWITCHING
+════════════════════════════════════════════════════ */
+function setViewMode(mode) {
+  viewMode = mode;
+  const gridEl   = document.getElementById('grid');
+  const singleEl = document.getElementById('singleView');
+  const complEl  = document.getElementById('completion');
+  const learnBtn = document.getElementById('learnModeBtn');
+  const vBtn     = document.getElementById('viewToggleBtn');
+  const sub      = document.getElementById('modeSubtitle');
+  const statF    = document.getElementById('statFlipped');
+  const statR    = document.getElementById('statRemaining');
+
+  complEl.style.display = 'none';
+
+  if (mode === 'grid') {
+    gridEl.style.display   = '';
+    singleEl.style.display = 'none';
+    learnBtn.style.display = 'none';
+    vBtn.textContent       = '▶ Jedna po druhé';
+    vBtn.classList.remove('mode-active');
+    sub.textContent        = 'Grid — všechny kartičky najednou';
+    statF.style.display    = '';
+    statR.style.display    = 'none';
+    learnMode = false;
+    learnBtn.classList.remove('learn-active');
+    learnBtn.textContent   = '🎓 Režim učení';
+    renderGrid(displayedCards);
+  } else {
+    gridEl.style.display   = 'none';
+    singleEl.style.display = 'flex';
+    learnBtn.style.display = '';
+    vBtn.textContent       = '☰ Zobrazit grid';
+    vBtn.classList.add('mode-active');
+    sub.textContent        = 'Jedna karta po druhé';
+    statF.style.display    = 'none';
+    statR.style.display    = learnMode ? '' : 'none';
+    singleIdx   = 0;
+    singleFlipped = false;
+    document.getElementById('browseNav').style.display = learnMode ? 'none' : 'flex';
+    document.getElementById('learnNav').style.display  = learnMode ? 'flex'  : 'none';
+    document.getElementById('flipHint').classList.remove('visible');
+    if (learnMode) startLearnMode();
+    else renderSingleCard();
+  }
+}
+
+function toggleLearnMode() {
+  learnMode = !learnMode;
+  const btn = document.getElementById('learnModeBtn');
+  const sub = document.getElementById('modeSubtitle');
+  const statR = document.getElementById('statRemaining');
+
+  if (learnMode) {
+    btn.classList.add('learn-active');
+    btn.textContent = '✕ Ukončit učení';
+    sub.textContent = 'Režim učení — Neumím / Zvládám';
+    statR.style.display = '';
+    document.getElementById('browseNav').style.display = 'none';
+    document.getElementById('learnNav').style.display  = 'flex';
+    document.getElementById('completion').style.display = 'none';
+    document.getElementById('singleView').style.display = 'flex';
+    startLearnMode();
+  } else {
+    btn.classList.remove('learn-active');
+    btn.textContent = '🎓 Režim učení';
+    sub.textContent = 'Jedna karta po druhé';
+    statR.style.display = 'none';
+    document.getElementById('browseNav').style.display = 'flex';
+    document.getElementById('learnNav').style.display  = 'none';
+    singleIdx = 0; singleFlipped = false;
+    renderSingleCard();
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   INIT & EVENT LISTENERS
+════════════════════════════════════════════════════ */
+function init(cards) {
+  displayedCards = cards;
+  knownSet.clear(); flippedSet.clear();
+  learnMode = false;
+  document.getElementById('learnModeBtn').classList.remove('learn-active');
+  document.getElementById('learnModeBtn').textContent = '🎓 Režim učení';
+  document.getElementById('completion').style.display = 'none';
+  if (viewMode === 'grid') renderGrid(displayedCards);
+  else { singleIdx = 0; singleFlipped = false; renderSingleCard(); }
+}
+
+// Filter buttons
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentCat = btn.dataset.cat;
+    init(getFiltered());
+  });
+});
+
+document.getElementById('viewToggleBtn').addEventListener('click', () => {
+  setViewMode(viewMode === 'grid' ? 'single' : 'grid');
+});
+
+document.getElementById('learnModeBtn').addEventListener('click', toggleLearnMode);
+
+document.getElementById('shuffleBtn').addEventListener('click', () => {
+  init(shuffle(getFiltered()));
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  hideKnown = false;
+  document.getElementById('hideKnownBtn').textContent = 'Skrýt zvládnuté';
+  init(getFiltered());
+});
+
+document.getElementById('hideKnownBtn').addEventListener('click', () => {
+  hideKnown = !hideKnown;
+  document.getElementById('hideKnownBtn').textContent = hideKnown ? 'Zobrazit vše' : 'Skrýt zvládnuté';
+  if (viewMode === 'grid') renderGrid(displayedCards);
+});
+
+// Single card navigation
+document.getElementById('prevBtn').addEventListener('click', () => goSingle(-1));
+document.getElementById('nextBtn').addEventListener('click', () => goSingle(1));
+
+// Learning mode buttons
+document.getElementById('nopeBtn').addEventListener('click', learnNope);
+document.getElementById('yepBtn').addEventListener('click',  learnYep);
+
+// Restart after completion
+document.getElementById('restartBtn').addEventListener('click', () => {
+  document.getElementById('completion').style.display = 'none';
+  document.getElementById('singleView').style.display = 'flex';
+  if (learnMode) startLearnMode();
+  else { singleIdx = 0; singleFlipped = false; renderSingleCard(); }
+});
+
+// Boot
+init(getFiltered());
+</script>
+
+</body>
+</html>
